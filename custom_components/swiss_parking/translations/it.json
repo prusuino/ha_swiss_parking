@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Swiss Parking",
+        "description": "Posti auto liberi in tempo reale dal sistema di guida ai parcheggi di una città svizzera. Una voce per città — aggiungi di nuovo l'integrazione per un'altra città. Attualmente supportate: Zurigo, Basilea, Winterthur, Berna.",
+        "data": {
+          "city": "Città"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Questa città è già configurata."
+    },
+    "error": {
+      "cannot_connect": "Il feed della città non è raggiungibile.",
+      "no_garages": "Il feed della città non ha restituito parcheggi."
+    }
+  }
+}

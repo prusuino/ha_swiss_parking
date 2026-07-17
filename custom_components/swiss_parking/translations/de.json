@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Swiss Parking",
+        "description": "Freie Parkplätze in Echtzeit aus dem Parkleitsystem einer Schweizer Stadt. Ein Eintrag pro Stadt — Integration erneut hinzufügen für eine weitere Stadt. Aktuell unterstützt: Zürich, Basel, Winterthur, Bern.",
+        "data": {
+          "city": "Stadt"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Diese Stadt ist bereits eingerichtet."
+    },
+    "error": {
+      "cannot_connect": "Der Parkleitsystem-Feed der Stadt ist nicht erreichbar.",
+      "no_garages": "Der Parkleitsystem-Feed der Stadt lieferte keine Parkhäuser."
+    }
+  }
+}

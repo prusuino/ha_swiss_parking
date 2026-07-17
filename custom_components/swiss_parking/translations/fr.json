@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Swiss Parking",
+        "description": "Places de parking libres en temps réel depuis le système de guidage au stationnement d'une ville suisse. Une entrée par ville — ajoutez à nouveau l'intégration pour une autre ville. Actuellement pris en charge : Zurich, Bâle, Winterthour, Berne.",
+        "data": {
+          "city": "Ville"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Cette ville est déjà configurée."
+    },
+    "error": {
+      "cannot_connect": "Le flux de la ville est injoignable.",
+      "no_garages": "Le flux de la ville n'a renvoyé aucun parking."
+    }
+  }
+}

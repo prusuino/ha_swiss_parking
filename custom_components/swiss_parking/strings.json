@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Swiss Parking",
+        "description": "Live free parking spaces from the parking guidance system of a Swiss city. One entry per city — add the integration again for another city. Currently supported: Zürich, Basel, Winterthur, Bern.",
+        "data": {
+          "city": "City"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This city is already configured."
+    },
+    "error": {
+      "cannot_connect": "The city's parking feed could not be reached.",
+      "no_garages": "The city's parking feed returned no garages."
+    }
+  }
+}
