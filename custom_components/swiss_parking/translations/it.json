@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Swiss Parking",
-        "description": "Posti auto liberi in tempo reale dal sistema di guida ai parcheggi di una città svizzera. Una voce per città — aggiungi di nuovo l'integrazione per un'altra città. Attualmente supportate: Zurigo, Basilea, Winterthur, Berna.",
+        "description": "Posti auto liberi in tempo reale dal sistema di guida ai parcheggi di una città svizzera. Una voce per città — aggiungi di nuovo l'integrazione per un'altra città. Attualmente supportate: Zurigo, Basilea, Winterthur, Berna, Frauenfeld.",
         "data": {
           "city": "Città"
         }

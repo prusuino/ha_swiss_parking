@@ -10,6 +10,7 @@ CITY_ZURICH = "zurich"
 CITY_BASEL = "basel"
 CITY_WINTERTHUR = "winterthur"
 CITY_BERN = "bern"
+CITY_FRAUENFELD = "frauenfeld"
 
 # Every supported city with its display name and per-source attribution.
 # One config entry per city; the adapter functions live in sources.py.
@@ -30,6 +31,10 @@ CITIES = {
         "name": "Bern",
         # Terms of the operator: integrations must link to the source site.
         "attribution": "Data: Berner Parkhäuser (www.parking-bern.ch)",
+    },
+    CITY_FRAUENFELD: {
+        "name": "Frauenfeld",
+        "attribution": "Data: Stadt Frauenfeld / Kanton Thurgau (data.tg.ch)",
     },
 }
 

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Swiss Parking",
-        "description": "Live free parking spaces from the parking guidance system of a Swiss city. One entry per city — add the integration again for another city. Currently supported: Zürich, Basel, Winterthur, Bern.",
+        "description": "Live free parking spaces from the parking guidance system of a Swiss city. One entry per city — add the integration again for another city. Currently supported: Zürich, Basel, Winterthur, Bern, Frauenfeld.",
         "data": {
           "city": "City"
         }

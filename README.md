@@ -13,6 +13,7 @@ A Home Assistant custom integration that shows the live number of free parking s
 | Basel | 16 | Kanton Basel-Stadt open data portal (JSON) |
 | Winterthur | 13 | Stadtplan Winterthur (WFS) |
 | Bern | ~12 | Berner Parkhäuser (XML) |
+| Frauenfeld | 6 | Stadt Frauenfeld / Kanton Thurgau open data portal (JSON) |
 
 There is no national aggregator for parking data in Switzerland — each city publishes its own feed in its own format, so each city has its own small adapter. Other cities either publish no machine-readable real-time feed at all, or their feed was found dead at the time of writing (St. Gallen) or requires an access token (Geneva). New adapters are welcome — open an issue if your city publishes a feed.
 
@@ -23,7 +24,7 @@ One config entry per city (add the integration again for another city):
 | Entity | Type | Description |
 |---|---|---|
 | `sensor.parking_<city>_<garage>` | Sensor | State = currently free spaces of one car park. Attributes: localized status (open/closed), capacity, occupancy %, address, link, coordinates, last update. |
-| `geo_location.parking_...` | Geo-location | One map marker per car park with known coordinates, labeled with the live number of free spaces ("158 free") or "Closed". State = distance from your Home Assistant home zone (km). Zürich's feed contains no coordinates, so Zürich creates sensors only. |
+| `geo_location.parking_...` | Geo-location | One map marker per car park with known coordinates, labeled with the live number of free spaces ("158 free") or "Closed". State = distance from your Home Assistant home zone (km). Zürich's feed contains no coordinates, so Zürich creates sensors only. Frauenfeld reports open surface lots (no open/closed state). |
 
 Data refreshes every 2 minutes. Garages appearing in or disappearing from a feed are picked up automatically.
 

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Swiss Parking",
-        "description": "Places de parking libres en temps réel depuis le système de guidage au stationnement d'une ville suisse. Une entrée par ville — ajoutez à nouveau l'intégration pour une autre ville. Actuellement pris en charge : Zurich, Bâle, Winterthour, Berne.",
+        "description": "Places de parking libres en temps réel depuis le système de guidage au stationnement d'une ville suisse. Une entrée par ville — ajoutez à nouveau l'intégration pour une autre ville. Actuellement pris en charge : Zurich, Bâle, Winterthour, Berne, Frauenfeld.",
         "data": {
           "city": "Ville"
         }

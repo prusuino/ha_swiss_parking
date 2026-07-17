@@ -33,6 +33,7 @@ from homeassistant.util import slugify
 from .const import (
     CITY_BASEL,
     CITY_BERN,
+    CITY_FRAUENFELD,
     CITY_WINTERTHUR,
     CITY_ZURICH,
     FETCH_TIMEOUT_SECONDS,
@@ -50,6 +51,10 @@ WINTERTHUR_URL = (
     "?Service=WFS&Version=1.1.0&Request=GetFeature&TypeName=ms:ParkleitsystemLayer"
 )
 BERN_URL = "https://www.parking-bern.ch/parkdata.xml"
+FRAUENFELD_URL = (
+    "https://data.tg.ch/api/explore/v2.1/catalog/datasets/frauenfeld-1/records"
+    "?limit=40&order_by=-timestamp"
+)
 
 # The Bern feed identifies most garages only by code (P01...P10). Names and
 # coordinates taken from the operator's own site (www.parking-bern.ch),
@@ -232,11 +237,43 @@ async def fetch_bern(hass: HomeAssistant) -> dict[str, dict]:
     return garages
 
 
+async def fetch_frauenfeld(hass: HomeAssistant) -> dict[str, dict]:
+    """Stadt Frauenfeld via the cantonal open data portal (data.tg.ch,
+    dataset frauenfeld-1). The dataset keeps history, so the query is sorted
+    newest-first and only each area's most recent record is used. Open
+    surface lots rather than garages — no open/closed state."""
+    data = await _fetch_json(hass, FRAUENFELD_URL)
+
+    garages: dict[str, dict] = {}
+    for entry in data.get("results", []):
+        name = (entry.get("name") or "").strip()
+        if not name:
+            continue
+        garage_id = slugify(name)
+        if garage_id in garages:
+            continue  # newest record per area wins (results are sorted)
+        coords = entry.get("koordinaten") or {}
+        garages[garage_id] = {
+            "id": garage_id,
+            "name": name,
+            "free": _int_or_none(entry.get("available_spots")),
+            "total": _int_or_none(entry.get("total_spots")),
+            "status": STATUS_OPEN,
+            "latitude": coords.get("lat"),
+            "longitude": coords.get("lon"),
+            "address": None,
+            "link": "https://data.tg.ch/explore/dataset/frauenfeld-1/",
+            "last_update": entry.get("timestamp"),
+        }
+    return garages
+
+
 CITY_FETCHERS = {
     CITY_ZURICH: fetch_zurich,
     CITY_BASEL: fetch_basel,
     CITY_WINTERTHUR: fetch_winterthur,
     CITY_BERN: fetch_bern,
+    CITY_FRAUENFELD: fetch_frauenfeld,
 }
 
 

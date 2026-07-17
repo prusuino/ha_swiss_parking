@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Swiss Parking",
-        "description": "Freie Parkplätze in Echtzeit aus dem Parkleitsystem einer Schweizer Stadt. Ein Eintrag pro Stadt — Integration erneut hinzufügen für eine weitere Stadt. Aktuell unterstützt: Zürich, Basel, Winterthur, Bern.",
+        "description": "Freie Parkplätze in Echtzeit aus dem Parkleitsystem einer Schweizer Stadt. Ein Eintrag pro Stadt — Integration erneut hinzufügen für eine weitere Stadt. Aktuell unterstützt: Zürich, Basel, Winterthur, Bern, Frauenfeld.",
         "data": {
           "city": "Stadt"
         }
