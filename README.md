@@ -70,3 +70,9 @@ This is an unofficial integration, not affiliated with, endorsed by, or supporte
 ## License
 
 [MIT](LICENSE) — the license covers this integration's code only, not the data provided by the sources.
+
+## Support
+
+If this integration is useful to you, you can support its development:
+
+<a href="https://www.buymeacoffee.com/prusuino"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="41"></a>
