@@ -4,6 +4,13 @@ DOMAIN = "swiss_parking"
 UPDATE_INTERVAL_MINUTES = 2
 FETCH_TIMEOUT_SECONDS = 30
 
+# Staleness cutoffs on the sources' own timestamps (see sources.mark_stale):
+# a feed whose newest record is older than this counts as dead — only for
+# feeds stamped on every publication (sources.FEED_STAMPED_CITIES) ...
+STALE_FEED_MINUTES = 60
+# ... and a single garage whose own record is older than this is withdrawn.
+STALE_GARAGE_HOURS = 24
+
 CONF_CITY = "city"
 
 CITY_ZURICH = "zurich"

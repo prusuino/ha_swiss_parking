@@ -39,16 +39,24 @@ One config entry per city (add the integration again for another city):
 
 | Entity | Type | Description |
 |---|---|---|
-| `sensor.parking_<city>_<garage>` | Sensor | State = currently free spaces of one car park. Attributes: localized status (open/closed), capacity, occupancy %, address, link, coordinates, last update. |
-| `geo_location.car_park_<garage>` (English) / `geo_location.parkhaus_<garage>` (German) — see [Addressing the map markers](#addressing-the-map-markers) | Geo-location | One map marker per car park with known coordinates, labeled with the live number of free spaces ("158 free") or "Closed", refreshed in place on every update; the marker goes unavailable while the city's feed is unreachable. State = distance from your Home Assistant home zone (km). Attributes: status label, free, total, address, link, last update. Zürich's feed contains no coordinates, so Zürich creates sensors only. Frauenfeld reports open surface lots (no open/closed state). |
+| `sensor.parking_<city>_<garage>` | Sensor | State = currently free spaces of one car park. Attributes: localized status (open/closed/unknown), capacity, occupancy %, address, link, coordinates, last update (ISO 8601). |
+| `geo_location.parking_<city>_<garage>` (markers created before 1.3.0 keep their localized id — see [Addressing the map markers](#addressing-the-map-markers)) | Geo-location | One map marker per car park with known coordinates, labeled with the live number of free spaces ("158 free") or "Closed", refreshed in place on every update; the marker goes unavailable while the city's feed is unreachable. State = distance from your Home Assistant home zone (km). Attributes: status label, free, total, address, link, last update (ISO 8601). Zürich's feed contains no coordinates, so Zürich creates sensors only. Frauenfeld reports open surface lots (no open/closed state). |
 
 Data refreshes every 2 minutes. Garages appearing in or disappearing from a feed are picked up automatically.
 
 ### Addressing the map markers
 
-The map markers are the one kind of entity without a fixed entity id: Home Assistant derives the object id from the entity's name, and that name is localized. The same car park is `geo_location.parkhaus_bahnhof_parking` on a German instance and `geo_location.car_park_bahnhof_parking` on an English one (French `geo_location.parking_…`, Italian `geo_location.parcheggio_…`). A card or template written against one language finds nothing on the other, so do not address markers by entity id — use their `source` attribute, which is always `swiss_parking`:
+Since 1.3.0 a new map marker gets the same fixed, language-independent entity id as its sensor: `geo_location.parking_<city>_<garage>`. Markers that existed before keep the id they have — Home Assistant applies a suggested id only when an entity is first registered — and those ids were derived from the localized name: the same car park is `geo_location.parkhaus_bahnhof_parking` on a German instance and `geo_location.car_park_bahnhof_parking` on an English one (French `geo_location.parking_…`, Italian `geo_location.parcheggio_…`). A card or template written against one of those ids does not carry over to another instance, so do not address markers by entity id — use their `source` attribute, which is always `swiss_parking`:
 
-- **Map card** — `geo_location_sources` draws every marker of this integration (also the ones hidden from the auto-generated overview) and follows car parks as they come and go, and it can put the live number of free spaces on the marker label:
+- **Map card** — `geo_location_sources` draws every marker of this integration (also the ones hidden from the auto-generated overview) and follows car parks as they come and go:
+
+  ```yaml
+  type: map
+  geo_location_sources:
+    - swiss_parking
+  ```
+
+  On Home Assistant 2025.4 or newer the source can be given as an object, which puts the live number of free spaces on the marker label:
 
   ```yaml
   type: map
@@ -107,6 +115,9 @@ Until the integration shows up in the HACS search, the button above adds it as a
 - Capacity ("total") is not reported by every source for every garage; the occupancy percentage attribute is only set where it is.
 - A malformed entry in a source feed is skipped and never breaks the whole update.
 - If a city's feed is unreachable, its sensors and map markers go unavailable rather than showing stale numbers; they recover on the next successful update.
+- Stale data is not shown as live either: the sources' own timestamps are checked. A car park whose record is older than 24 hours reports an unknown number of free spaces (status "unknown") instead of an old one; `last_update` keeps the source's timestamp so you can see how old it is. For Basel, Bern and Frauenfeld, whose feeds are stamped on every publication, every car park is withdrawn this way as soon as the feed as a whole has not been updated for more than 60 minutes. Zürich and Winterthur only re-stamp a car park when its count changes, so a quiet hour without any change is normal there; the 60-minute feed rule is therefore not applied to those two cities, and the per-car-park limit is deliberately generous for the same reason.
+- The `last_update` attribute is ISO 8601 with a time-zone offset for every city (e.g. `2026-08-29T20:37:32+02:00`), whatever format the source uses, so `as_datetime` works on it in templates.
+- A car park that disappears from its city's feed is removed together with its entity-registry entry, so it does not linger as an unavailable "restored" entity. When it reappears under the same unique id, Home Assistant restores its previous entity id and your customizations (name, icon, area, labels, visibility) from its record of deleted entities; older Home Assistant versions create it afresh.
 
 ## Data sources & license
 

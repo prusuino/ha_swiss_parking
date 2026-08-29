@@ -13,21 +13,29 @@ normalized dict keyed by a stable per-garage id:
         "longitude": float | None,
         "address": str | None,
         "link": str | None,
-        "last_update": str | None,  # ISO timestamp as reported by the source
+        "last_update": str | None,  # source timestamp, ISO 8601 with offset (raw text if unparseable)
     }
 
 There is no national aggregator for parking data (unlike ich-tanke-strom.ch
 for EV chargers) — every city publishes its own feed in its own format, so
 each gets a small dedicated parser. All feeds are public and unauthenticated.
+
+Timestamps are normalised by _timestamp(), and async_fetch_city() finally
+withdraws numbers whose source timestamp is too old to be live (mark_stale).
 """
 from __future__ import annotations
 
 import logging
 import re
 import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta, timezone, tzinfo
+from email.utils import parsedate_to_datetime
+from functools import lru_cache
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.util import dt as dt_util
 from homeassistant.util import slugify
 
 from .const import (
@@ -37,6 +45,8 @@ from .const import (
     CITY_WINTERTHUR,
     CITY_ZURICH,
     FETCH_TIMEOUT_SECONDS,
+    STALE_FEED_MINUTES,
+    STALE_GARAGE_HOURS,
     STATUS_CLOSED,
     STATUS_OPEN,
     STATUS_UNKNOWN,
@@ -94,6 +104,86 @@ def _int_or_none(value) -> int | None:
         return None
 
 
+# Timestamps that carry no offset (Bern's "dd.mm.yyyy HH:MM:SS") are Swiss
+# local time, whatever time zone the Home Assistant instance runs in.
+SOURCE_TIME_ZONE = "Europe/Zurich"
+
+
+@lru_cache(maxsize=1)
+def _source_tzinfo() -> tzinfo:
+    try:
+        return ZoneInfo(SOURCE_TIME_ZONE)
+    except ZoneInfoNotFoundError:  # no tz database on this host
+        return timezone.utc
+
+
+def parse_timestamp(value) -> datetime | None:
+    """Parse a source timestamp into an aware datetime; None if it is empty
+    or in a format no source is known to use. Accepted: ISO 8601 (Basel,
+    Frauenfeld, Winterthur's "+00" offset), RFC 822 (Zürich's RSS pubDate)
+    and "dd.mm.yyyy HH:MM:SS" (Bern, taken as Swiss local time)."""
+    text = str(value).strip() if value is not None else ""
+    if not text:
+        return None
+    parsed: datetime | None = None
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        pass
+    if parsed is None:
+        try:
+            parsed = datetime.strptime(text, "%d.%m.%Y %H:%M:%S")
+        except ValueError:
+            pass
+    if parsed is None:
+        try:
+            parsed = parsedate_to_datetime(text)
+        except (TypeError, ValueError):
+            return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=_source_tzinfo())
+    return parsed
+
+
+def _timestamp(value) -> str | None:
+    """last_update as stored on a garage: ISO 8601 with offset, so templates
+    can parse every city the same way; the raw text if it cannot be parsed."""
+    parsed = parse_timestamp(value)
+    if parsed is not None:
+        return parsed.isoformat(timespec="seconds")
+    text = str(value).strip() if value is not None else ""
+    return text or None
+
+
+def mark_stale(garages: dict[str, dict], now: datetime, feed_cutoff: bool = True) -> dict[str, dict]:
+    """Withdraw numbers whose source timestamp is too old to count as live.
+
+    Two cutoffs. With feed_cutoff, a feed whose newest record is older than
+    STALE_FEED_MINUTES is dead — Frauenfeld's history dataset would otherwise
+    keep serving days-old records, Bern's feed-level "updated" would just sit
+    still — and every garage of it is withdrawn. That test is only sound for
+    feeds stamped on every publication (FEED_STAMPED_CITIES): Winterthur and
+    Zürich re-stamp a garage only when its count changes, so a quiet hour
+    with no change on any garage — a small city at night — would flag the
+    whole feed dead although its numbers are right. Independently, a single
+    garage whose own record is older than STALE_GARAGE_HOURS is withdrawn;
+    that cutoff is generous on purpose so that a quiet garage may keep an
+    older stamp for hours. A withdrawn garage keeps name, capacity,
+    coordinates and last_update but reports free=None and status unknown."""
+    stamps = {gid: parse_timestamp(garage.get("last_update")) for gid, garage in garages.items()}
+    known = [stamp for stamp in stamps.values() if stamp is not None]
+    if not known:
+        return garages
+    feed_dead = feed_cutoff and now - max(known) > timedelta(minutes=STALE_FEED_MINUTES)
+    garage_limit = timedelta(hours=STALE_GARAGE_HOURS)
+    for gid, garage in garages.items():
+        stamp = stamps[gid]
+        if feed_dead or (stamp is not None and now - stamp > garage_limit):
+            garage["free"] = None
+            garage["status"] = STATUS_UNKNOWN
+    return garages
+
+
 async def fetch_zurich(hass: HomeAssistant) -> dict[str, dict]:
     """PLS Stadt Zürich RSS feed (CC-0). Per item: title "Parkhaus Accu /
     Otto-Schütz-Weg", description "open /  164". No capacity, no coords."""
@@ -129,7 +219,7 @@ async def fetch_zurich(hass: HomeAssistant) -> dict[str, dict]:
             "longitude": None,
             "address": address or None,
             "link": link,
-            "last_update": pub_date,
+            "last_update": _timestamp(pub_date),
         }
     return garages
 
@@ -158,7 +248,7 @@ async def fetch_basel(hass: HomeAssistant) -> dict[str, dict]:
             "longitude": coords.get("lon"),
             "address": entry.get("address"),
             "link": entry.get("link"),
-            "last_update": entry.get("published"),
+            "last_update": _timestamp(entry.get("published")),
         }
     return garages
 
@@ -194,7 +284,7 @@ async def fetch_winterthur(hass: HomeAssistant) -> dict[str, dict]:
             "longitude": lon,
             "address": None,
             "link": None,
-            "last_update": (feature.findtext("ms:LetzteAktualisierung", namespaces=ns) or "").strip() or None,
+            "last_update": _timestamp(feature.findtext("ms:LetzteAktualisierung", namespaces=ns)),
         }
     return garages
 
@@ -204,8 +294,9 @@ async def fetch_bern(hass: HomeAssistant) -> dict[str, dict]:
     name (mostly P-codes), state ("1" = open), spacecount (-1 = unknown),
     spacefree. Names/coordinates for the codes come from BERN_GARAGES."""
     text = await _fetch_text(hass, BERN_URL)
-    text = text.lstrip("﻿")
+    text = text.lstrip("\ufeff")
     root = ET.fromstring(text)
+    updated = _timestamp(root.get("updated"))
 
     garages: dict[str, dict] = {}
     for parking in root.iter("parking"):
@@ -232,7 +323,7 @@ async def fetch_bern(hass: HomeAssistant) -> dict[str, dict]:
             "longitude": lon,
             "address": None,
             "link": "https://www.parking-bern.ch",
-            "last_update": root.get("updated"),
+            "last_update": updated,
         }
     return garages
 
@@ -263,7 +354,7 @@ async def fetch_frauenfeld(hass: HomeAssistant) -> dict[str, dict]:
             "longitude": coords.get("lon"),
             "address": None,
             "link": "https://data.tg.ch/explore/dataset/frauenfeld-1/",
-            "last_update": entry.get("timestamp"),
+            "last_update": _timestamp(entry.get("timestamp")),
         }
     return garages
 
@@ -276,8 +367,19 @@ CITY_FETCHERS = {
     CITY_FRAUENFELD: fetch_frauenfeld,
 }
 
+# Feeds whose stamps move with every publication, so a newest stamp older
+# than STALE_FEED_MINUTES really means the feed is dead: Basel stamps all its
+# records with one "published" time, Bern carries a feed-level "updated",
+# Frauenfeld's history dataset adds a row per publication. Zürich and
+# Winterthur re-stamp a garage only when its count changes — a correct feed
+# there carries stamps hours or days old — so they get the per-garage cutoff
+# alone (see mark_stale).
+FEED_STAMPED_CITIES = frozenset({CITY_BASEL, CITY_BERN, CITY_FRAUENFELD})
+
 
 async def async_fetch_city(hass: HomeAssistant, city: str) -> dict[str, dict]:
     """Fetch and normalize one city's garages. Raises on network errors;
-    a single malformed garage entry is skipped, never fatal."""
-    return await CITY_FETCHERS[city](hass)
+    a single malformed garage entry is skipped, never fatal. Numbers whose
+    source timestamp is too old are withdrawn (see mark_stale)."""
+    garages = await CITY_FETCHERS[city](hass)
+    return mark_stale(garages, dt_util.utcnow(), feed_cutoff=city in FEED_STAMPED_CITIES)

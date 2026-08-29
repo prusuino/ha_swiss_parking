@@ -2,7 +2,9 @@
 
 Garages can appear/disappear in the source feeds, so the entity list is
 diffed on every coordinator update (same pattern as the connector sensors
-of the charging-stations integration)."""
+of the charging-stations integration). A garage that leaves the feed is
+removed together with its entity-registry row (see cleanup.py), so it does
+not linger as a "restored" unavailable entity after the next restart."""
 from __future__ import annotations
 
 import logging
@@ -14,6 +16,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
 
+from .cleanup import async_remove_entity
 from .const import CITIES, DOMAIN, STATUS_CLOSED
 from .coordinator import SwissParkingCoordinator
 from .device import device_info
@@ -42,8 +45,7 @@ async def async_setup_entry(
             async_add_entities(new_entities)
 
         for garage_id in [g for g in known if g not in garages]:
-            entity = known.pop(garage_id)
-            hass.async_create_task(entity.async_remove(force_remove=True))
+            hass.async_create_task(async_remove_entity(hass, known.pop(garage_id)))
 
     entry.async_on_unload(coordinator.async_add_listener(_sync_entities))
     _sync_entities()
@@ -71,6 +73,8 @@ class GarageFreeSpacesSensor(CoordinatorEntity[SwissParkingCoordinator], SensorE
         self._attr_unique_id = f"{entry.entry_id}_{garage_id}"
         self._attr_device_info = device_info(hass, entry)
         self._attr_attribution = CITIES[coordinator.city]["attribution"]
+        # Suggested id, applied when the sensor is first registered; the city
+        # slug is the per-entry discriminator (one config entry per city).
         self.entity_id = f"sensor.parking_{city_slug}_{slugify(self._attr_name)}"
 
     def _garage(self) -> dict:

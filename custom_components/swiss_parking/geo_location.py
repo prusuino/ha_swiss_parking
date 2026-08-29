@@ -4,7 +4,13 @@ current number of free spaces (refreshed in place on every update).
 Zurich's feed has no coordinates, so Zurich entries create no markers —
 the sensors carry the data regardless. Hidden from Home Assistant's
 auto-generated default dashboard map, same as the charging-stations
-integration."""
+integration.
+
+Entity ids follow the sensors' pattern (geo_location.parking_<city>_<garage>)
+— a suggested id that Home Assistant applies when a marker is first
+registered; markers that already exist keep the id they have. A garage that
+leaves the feed is removed together with its entity-registry row (see
+cleanup.py)."""
 from __future__ import annotations
 
 import logging
@@ -17,6 +23,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import slugify
 from homeassistant.util.location import distance
 
+from .cleanup import async_remove_entity
 from .const import CITIES, DOMAIN, STATUS_CLOSED
 from .coordinator import SwissParkingCoordinator
 from .localization import t
@@ -31,6 +38,7 @@ async def async_setup_entry(
     coordinator: SwissParkingCoordinator = hass.data[DOMAIN][entry.entry_id]
     known: dict[str, GarageEvent] = {}
     attribution = CITIES[coordinator.city]["attribution"]
+    city_slug = slugify(CITIES[coordinator.city]["name"])
 
     @callback
     def _sync_entities() -> None:
@@ -50,7 +58,7 @@ async def async_setup_entry(
             existing = known.get(garage_id)
             if existing is None:
                 known[garage_id] = GarageEvent(
-                    hass, coordinator, entry, garage_id, garage, attribution
+                    hass, coordinator, entry, garage_id, garage, attribution, city_slug
                 )
                 new_entities.append(known[garage_id])
             else:
@@ -59,8 +67,7 @@ async def async_setup_entry(
             async_add_entities(new_entities)
 
         for garage_id in [g for g in known if g not in garages]:
-            entity = known.pop(garage_id)
-            hass.async_create_task(entity.async_remove(force_remove=True))
+            hass.async_create_task(async_remove_entity(hass, known.pop(garage_id)))
 
     entry.async_on_unload(coordinator.async_add_listener(_sync_entities))
     _sync_entities()
@@ -92,6 +99,7 @@ class GarageEvent(GeolocationEvent):
         garage_id: str,
         garage: dict,
         attribution: str,
+        city_slug: str,
     ) -> None:
         self._hass_ref = hass
         self._coordinator = coordinator
@@ -102,7 +110,13 @@ class GarageEvent(GeolocationEvent):
         # fighting over one registry entry.
         self._attr_unique_id = f"{entry.entry_id}_{garage_id}"
         prefix = t("garage_entity_prefix", hass)
-        self._attr_name = f"{prefix} – {garage.get('name') or garage_id}"
+        name = garage.get("name") or garage_id
+        self._attr_name = f"{prefix} – {name}"
+        # Suggested id, language-independent like the sensors' and applied only
+        # when the marker is first registered; the city slug is the per-entry
+        # discriminator (one config entry per city). The friendly name above
+        # keeps the localized prefix.
+        self.entity_id = f"geo_location.parking_{city_slug}_{slugify(name)}"
         self._attr_latitude = garage.get("latitude")
         self._attr_longitude = garage.get("longitude")
         self._attr_distance = self._distance_from_home(hass, garage)
