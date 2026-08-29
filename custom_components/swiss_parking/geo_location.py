@@ -13,7 +13,6 @@ from homeassistant.components.geo_location import GeolocationEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfLength
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import slugify
 from homeassistant.util.location import distance
@@ -35,6 +34,11 @@ async def async_setup_entry(
 
     @callback
     def _sync_entities() -> None:
+        # Runs on every coordinator notification — including a failed
+        # refresh, which keeps the previous data but flips
+        # last_update_success. The in-place update below then writes state
+        # for every surviving marker, which is what publishes the
+        # availability change (see GarageEvent.available).
         garages = {
             gid: g
             for gid, g in (coordinator.data or {}).items()
@@ -45,7 +49,9 @@ async def async_setup_entry(
         for garage_id, garage in garages.items():
             existing = known.get(garage_id)
             if existing is None:
-                known[garage_id] = GarageEvent(hass, entry, garage_id, garage, attribution)
+                known[garage_id] = GarageEvent(
+                    hass, coordinator, entry, garage_id, garage, attribution
+                )
                 new_entities.append(known[garage_id])
             else:
                 existing.update_garage(garage)
@@ -61,33 +67,45 @@ async def async_setup_entry(
 
 
 class GarageEvent(GeolocationEvent):
-    """One garage on the map; label shows live free spaces."""
+    """One garage on the map; label shows live free spaces. Lifecycle
+    (appearing/disappearing) is managed by the sync function above; label
+    and attributes are refreshed in place on every coordinator update, and
+    availability follows the coordinator's last refresh."""
 
     _attr_should_poll = False
     _attr_source = SOURCE
     _attr_unit_of_measurement = UnitOfLength.KILOMETERS
     _attr_has_entity_name = False
+    # Hidden from Home Assistant's auto-generated default dashboard map (which
+    # otherwise draws every geo_location entity in the system) — still shown
+    # on a Map card that references them by source, which does not go through
+    # the visible-by-default list. This applies to entities registered for the
+    # first time; whether an existing entity stays hidden is the user's
+    # decision alone and is never rewritten from here.
     _attr_entity_registry_visible_default = False
 
     def __init__(
-        self, hass: HomeAssistant, entry: ConfigEntry, garage_id: str, garage: dict, attribution: str
+        self,
+        hass: HomeAssistant,
+        coordinator: SwissParkingCoordinator,
+        entry: ConfigEntry,
+        garage_id: str,
+        garage: dict,
+        attribution: str,
     ) -> None:
         self._hass_ref = hass
+        self._coordinator = coordinator
         self._garage = garage
         self._attr_attribution = attribution
+        # The config entry id is part of the unique id, so two entries whose
+        # feeds list the same garage each keep their own marker instead of
+        # fighting over one registry entry.
         self._attr_unique_id = f"{entry.entry_id}_{garage_id}"
         prefix = t("garage_entity_prefix", hass)
         self._attr_name = f"{prefix} – {garage.get('name') or garage_id}"
         self._attr_latitude = garage.get("latitude")
         self._attr_longitude = garage.get("longitude")
         self._attr_distance = self._distance_from_home(hass, garage)
-
-    async def async_added_to_hass(self) -> None:
-        await super().async_added_to_hass()
-        registry = er.async_get(self.hass)
-        entry = registry.async_get(self.entity_id)
-        if entry is not None and entry.hidden_by is None:
-            registry.async_update_entity(self.entity_id, hidden_by=er.RegistryEntryHider.INTEGRATION)
 
     @staticmethod
     def _distance_from_home(hass: HomeAssistant, garage: dict) -> float | None:
@@ -101,9 +119,21 @@ class GarageEvent(GeolocationEvent):
 
     @callback
     def update_garage(self, garage: dict) -> None:
+        """Refresh label/attributes in place on a coordinator update, so the
+        map label stays current without recreating the entity."""
         self._garage = garage
         if self.hass:
             self.async_write_ha_state()
+
+    @property
+    def available(self) -> bool:
+        """Like the sensors: while the city's feed is unreachable the marker
+        is unavailable instead of showing its last known label indefinitely.
+        Not a CoordinatorEntity (the lifecycle is managed by the sync
+        function), so this reads the coordinator directly; the sync function
+        writes state after every refresh, failed ones included, so a flip
+        reaches the state machine."""
+        return self._coordinator.last_update_success
 
     def _label(self) -> str:
         garage = self._garage

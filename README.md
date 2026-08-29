@@ -1,6 +1,6 @@
 # Swiss Parking
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 <a href="https://www.buymeacoffee.com/prusuino"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="20"></a>
 
@@ -40,11 +40,39 @@ One config entry per city (add the integration again for another city):
 | Entity | Type | Description |
 |---|---|---|
 | `sensor.parking_<city>_<garage>` | Sensor | State = currently free spaces of one car park. Attributes: localized status (open/closed), capacity, occupancy %, address, link, coordinates, last update. |
-| `geo_location.parking_...` | Geo-location | One map marker per car park with known coordinates, labeled with the live number of free spaces ("158 free") or "Closed". State = distance from your Home Assistant home zone (km). Zürich's feed contains no coordinates, so Zürich creates sensors only. Frauenfeld reports open surface lots (no open/closed state). |
+| `geo_location.car_park_<garage>` (English) / `geo_location.parkhaus_<garage>` (German) — see [Addressing the map markers](#addressing-the-map-markers) | Geo-location | One map marker per car park with known coordinates, labeled with the live number of free spaces ("158 free") or "Closed", refreshed in place on every update; the marker goes unavailable while the city's feed is unreachable. State = distance from your Home Assistant home zone (km). Attributes: status label, free, total, address, link, last update. Zürich's feed contains no coordinates, so Zürich creates sensors only. Frauenfeld reports open surface lots (no open/closed state). |
 
 Data refreshes every 2 minutes. Garages appearing in or disappearing from a feed are picked up automatically.
 
-The map markers are hidden from Home Assistant's auto-generated default dashboard (which would draw every `geo_location` entity in the system); add your own Map card with `geo_location_sources: [swiss_parking]` and `label_mode: attribute` / `attribute: status` to see them with their live labels.
+### Addressing the map markers
+
+The map markers are the one kind of entity without a fixed entity id: Home Assistant derives the object id from the entity's name, and that name is localized. The same car park is `geo_location.parkhaus_bahnhof_parking` on a German instance and `geo_location.car_park_bahnhof_parking` on an English one (French `geo_location.parking_…`, Italian `geo_location.parcheggio_…`). A card or template written against one language finds nothing on the other, so do not address markers by entity id — use their `source` attribute, which is always `swiss_parking`:
+
+- **Map card** — `geo_location_sources` draws every marker of this integration (also the ones hidden from the auto-generated overview) and follows car parks as they come and go, and it can put the live number of free spaces on the marker label:
+
+  ```yaml
+  type: map
+  geo_location_sources:
+    - source: swiss_parking
+      label_mode: attribute
+      attribute: status
+  ```
+
+- **Templates** — filter the `geo_location` domain on the `source` attribute instead of naming entities:
+
+  ```jinja
+  {{ states.geo_location
+     | selectattr('attributes.source', 'eq', 'swiss_parking')
+     | rejectattr('attributes.free', 'none')
+     | selectattr('attributes.free', 'gt', 0)
+     | map(attribute='name') | list }}
+  ```
+
+  This lists the car parks with at least one free space, in any language.
+
+What does stay the same in every language is a marker's unique id (config entry + garage id), which is what the entity registry keys on — so renaming a marker or changing its visibility in the registry survives restarts and updates.
+
+The map markers are hidden from Home Assistant's auto-generated default dashboard (which would draw every `geo_location` entity in the system); a Map card with `geo_location_sources` as above shows them regardless. This only applies when a marker is first created — one you made visible yourself stays visible.
 
 ## Language
 
@@ -54,9 +82,13 @@ Entity and device names as well as status values adapt automatically to your Hom
 
 ### HACS (recommended)
 
-1. In HACS, go to **Integrations → ⋮ → Custom repositories**, add this repository URL with category **Integration**.
-2. Search for **"Swiss Parking"** and install.
-3. Restart Home Assistant.
+1. Open **HACS**, search for **"Swiss Parking"** and download it — or use the button, which opens the integration directly in your HACS:
+
+   [![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=prusuino&repository=ha_swiss_parking&category=integration)
+
+2. Restart Home Assistant.
+
+Until the integration shows up in the HACS search, the button above adds it as a custom repository.
 
 ### Manual
 
@@ -74,6 +106,7 @@ Entity and device names as well as status values adapt automatically to your Hom
 - The Bern feed identifies most garages only by code (P01…P10); the integration maps these to their real names and coordinates as published on the operator's own site.
 - Capacity ("total") is not reported by every source for every garage; the occupancy percentage attribute is only set where it is.
 - A malformed entry in a source feed is skipped and never breaks the whole update.
+- If a city's feed is unreachable, its sensors and map markers go unavailable rather than showing stale numbers; they recover on the next successful update.
 
 ## Data sources & license
 
