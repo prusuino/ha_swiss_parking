@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.1 — 2026-10-26
+
+- Releases now carry the integration as a zip file (`swiss_parking.zip`), and HACS downloads that file instead of the individual files from the repository (`zip_release` in `hacs.json`). No functional change; the download count shown by HACS starts with this release.
+- Nothing to do after updating.
+
 ## 1.3.0 — 2026-08-29
 
 - **Fixed: a car park that disappears from its city's feed no longer lingers as an unavailable "restored" entity.** Until now only the live entity was removed and its entity-registry entry stayed behind, so after the next restart the car park came back as a permanently unavailable sensor (and map marker) — one more for every car park a feed drops. The registry entry is now removed together with the entity. When the car park returns under its unchanged unique id, Home Assistant restores its previous entity id and your customizations (name, icon, area, labels, visibility) from its record of deleted entities; older Home Assistant versions create it afresh.

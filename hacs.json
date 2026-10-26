@@ -1,5 +1,7 @@
 {
   "name": "Swiss Parking",
+  "zip_release": true,
+  "filename": "swiss_parking.zip",
   "render_readme": true,
   "homeassistant": "2024.1.0"
 }
