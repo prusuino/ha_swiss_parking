@@ -1,6 +1,6 @@
 # Swiss Parking
 
-[![marketplace_badge](https://img.shields.io/badge/Marketplace-Default-41BDF5.svg)](https://hacs.xyz/docs/marketplace/)
+[![marketplace_badge](https://img.shields.io/badge/Marketplace-Custom-41BDF5.svg)](https://hacs.xyz/docs/marketplace/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 <a href="https://www.buymeacoffee.com/prusuino"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="20"></a>
 
@@ -90,15 +90,13 @@ Entity and device names as well as status values adapt automatically to your Hom
 
 ## Installation
 
-### Home Assistant Marketplace (recommended)
+### Home Assistant Marketplace (custom repository)
 
-1. Open **Settings → Marketplace** (Home Assistant 2026.11 or newer; on older versions open **HACS**), search for **"Swiss Parking"** and download it — or use the button, which opens the integration directly in your Marketplace:
+1. Open **Settings → Marketplace → ⋮ → Custom repositories** (Home Assistant 2026.11 or newer; on older versions **HACS → ⋮ → Custom repositories**), add `https://github.com/prusuino/ha_swiss_parking` with the category *Integration*, then download **Swiss Parking** — or use the button:
 
    [![Open in Marketplace](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=prusuino&repository=ha_swiss_parking&category=integration)
 
 2. Restart Home Assistant.
-
-Until the integration shows up in the Marketplace search, the button above adds it as a custom repository.
 
 ### Manual
 
