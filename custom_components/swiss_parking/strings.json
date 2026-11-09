@@ -16,5 +16,11 @@
       "cannot_connect": "The city's parking feed could not be reached.",
       "no_garages": "The city's parking feed returned no garages."
     }
+  },
+  "issues": {
+    "unreachable": {
+      "title": "Swiss Parking: feed for {city} unreachable",
+      "description": "The parking feed of {city} has not answered, or returned no car parks, for several refreshes in a row. Check your internet connection; if it is fine, the city's feed itself is down. The sensors and map markers stay unavailable until then and recover on their own; this notice disappears with the next successful refresh."
+    }
   }
 }

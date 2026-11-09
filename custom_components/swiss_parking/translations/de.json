@@ -16,5 +16,11 @@
       "cannot_connect": "Der Parkleitsystem-Feed der Stadt ist nicht erreichbar.",
       "no_garages": "Der Parkleitsystem-Feed der Stadt lieferte keine Parkhäuser."
     }
+  },
+  "issues": {
+    "unreachable": {
+      "title": "Swiss Parking: Feed für {city} nicht erreichbar",
+      "description": "Der Parkleitsystem-Feed von {city} hat mehrere Aktualisierungen in Folge nicht geantwortet oder keine Parkhäuser geliefert. Prüfe deine Internetverbindung; ist sie in Ordnung, ist der Feed der Stadt selbst gestört. Sensoren und Kartenmarker bleiben bis dahin nicht verfügbar und erholen sich von selbst; dieser Hinweis verschwindet mit der nächsten erfolgreichen Aktualisierung."
+    }
   }
 }

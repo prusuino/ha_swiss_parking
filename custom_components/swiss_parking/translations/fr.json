@@ -16,5 +16,11 @@
       "cannot_connect": "Le flux de la ville est injoignable.",
       "no_garages": "Le flux de la ville n'a renvoyé aucun parking."
     }
+  },
+  "issues": {
+    "unreachable": {
+      "title": "Swiss Parking : flux de {city} injoignable",
+      "description": "Le flux de stationnement de {city} n'a pas répondu, ou n'a renvoyé aucun parking, lors de plusieurs actualisations consécutives. Vérifie ta connexion internet ; si elle fonctionne, le flux de la ville lui-même est en panne. Les capteurs et les marqueurs de carte restent indisponibles jusque-là et se rétablissent d'eux-mêmes ; cet avis disparaît à la prochaine actualisation réussie."
+    }
   }
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.0 — 2026-11-09
+
+- **Repair notices.** A city feed that is unreachable or empty for three refreshes in a row raises a notice under Settings → Repairs; it withdraws itself. No change to entities or configuration.
+
 ## 1.5.0 — 2026-11-09
 
 - **Quality scale Bronze.** The integration keeps its coordinator in the config entry's runtime data, the README gained removal instructions and a quality-scale section, and the manifest declares the **bronze** tier. A test suite (timestamp formats of every city, stale-data withdrawal, the Zürich adapter, config flow with probe, unreachable or empty feed and one entry per city) runs on every push. No change to entities or configuration.

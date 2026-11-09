@@ -121,6 +121,7 @@ The integration declares **Bronze** on the [Home Assistant integration quality s
 
 ## Notes
 
+- **Repairs.** When a city's feed has not answered, or returned no car parks, for three refreshes in a row, a notice appears under **Settings → Repairs**; it disappears on its own with the next successful refresh.
 - The Bern feed identifies most garages only by code (P01…P10); the integration maps these to their real names and coordinates as published on the operator's own site.
 - Capacity ("total") is not reported by every source for every garage; the occupancy percentage attribute is only set where it is.
 - A malformed entry in a source feed is skipped and never breaks the whole update.

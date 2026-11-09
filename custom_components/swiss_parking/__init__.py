@@ -7,6 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 from .coordinator import SwissParkingCoordinator
+from .issues import async_clear_entry_issues
 
 type SwissParkingConfigEntry = ConfigEntry[SwissParkingCoordinator]
 
@@ -25,4 +26,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: SwissParkingConfigEntry)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: SwissParkingConfigEntry) -> bool:
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unloaded:
+        async_clear_entry_issues(hass, entry.entry_id)
+    return unloaded

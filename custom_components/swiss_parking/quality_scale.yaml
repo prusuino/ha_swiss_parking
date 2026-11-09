@@ -81,7 +81,7 @@ rules:
   reconfiguration-flow:
     status: exempt
     comment: An entry is one city with no further settings.
-  repair-issues: todo
+  repair-issues: done
   stale-devices: done
 
   # Platinum
