@@ -110,6 +110,15 @@ Entity and device names as well as status values adapt automatically to your Hom
 2. Search for **"Swiss Parking"**.
 3. Pick a city — the feed is probed live before the entry is created. Add the integration again for another city.
 
+## Removal
+
+1. **Settings → Devices & services → Swiss Parking**, open the entry's menu (⋮) and choose **Delete**; repeat for every city. The entities, their history, the map markers and the device go with the entry.
+2. Remove the integration itself in the **Marketplace** (or HACS; it was added as a custom repository), then restart Home Assistant. With a manual installation, delete `custom_components/swiss_parking` instead.
+
+## Quality scale
+
+The integration declares **Bronze** on the [Home Assistant integration quality scale](https://developers.home-assistant.io/docs/core/integration-quality-scale/): a config flow with tests, unique ids for every entity, brand images, installation and removal instructions, a connection check before an entry is created, no duplicate entries, runtime data on the config entry, and the other Bronze rules. The tier is self-assessed, as it is for every custom integration; the per-rule status, including what is still open for Silver and Gold, is in `custom_components/swiss_parking/quality_scale.yaml`.
+
 ## Notes
 
 - The Bern feed identifies most garages only by code (P01…P10); the integration maps these to their real names and coordinates as published on the operator's own site.

@@ -28,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    coordinator: SwissParkingCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: SwissParkingCoordinator = entry.runtime_data
     known: dict[str, GarageFreeSpacesSensor] = {}
     city_slug = slugify(CITIES[coordinator.city]["name"])
 
