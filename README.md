@@ -40,6 +40,8 @@ There is no national aggregator for parking data in Switzerland — each city pu
 
 ## What it provides
 
+![Example dashboard for Zurich with the free spaces per car park, a ranking and the history of the last 24 hours](docs/dashboard.png)
+
 One config entry per city (add the integration again for another city):
 
 | Entity | Type | Description |
