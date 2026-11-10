@@ -4,6 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 <a href="https://www.buymeacoffee.com/prusuino"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="20"></a>
 
+![Swiss Parking](readme_header.png)
+
 A Home Assistant custom integration that shows the live number of free parking spaces in the car parks of Swiss cities, sourced from each city's official parking-guidance system (Parkleitsystem).
 
 ## Related integrations
