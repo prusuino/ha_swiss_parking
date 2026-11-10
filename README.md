@@ -8,6 +8,15 @@
 
 A Home Assistant custom integration that shows the live number of free parking spaces in the car parks of Swiss cities, sourced from each city's official parking-guidance system (Parkleitsystem).
 
+## Highlights
+
+- **Free spaces, live**: one sensor per car park with status, capacity and occupancy, refreshed every 2 minutes from the city's official parking-guidance system.
+- **Five cities so far**: Zürich, Basel, Winterthur, Bern and Frauenfeld — one entry per city.
+- **On the map**: a marker per car park, labelled with the number of free spaces, with a fixed entity id that is the same in every language.
+- **Follows the city**: car parks that appear in or disappear from a feed are picked up automatically.
+- **Honest about age**: a record older than 24 hours is not shown as live, and every city reports its last update in the same ISO 8601 form.
+- **Set up in a minute**: pick a city, the feed is probed before the entry is created; German, English, French and Italian; diagnostics download.
+
 ## Related integrations
 
 More Home Assistant integrations from the same author:
