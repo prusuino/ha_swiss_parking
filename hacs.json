@@ -1,5 +1,6 @@
 {
   "name": "Swiss Parking",
+  "country": "CH",
   "zip_release": true,
   "filename": "swiss_parking.zip",
   "render_readme": true,

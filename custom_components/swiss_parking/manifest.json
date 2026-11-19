@@ -1,6 +1,7 @@
 {
   "domain": "swiss_parking",
   "name": "Swiss Parking",
+  "categories": ["local_services", "vehicles_transport.cars_evs"],
   "codeowners": ["@prusuino"],
   "config_flow": true,
   "documentation": "https://github.com/prusuino/ha_swiss_parking",
@@ -9,5 +10,5 @@
   "issue_tracker": "https://github.com/prusuino/ha_swiss_parking/issues",
   "quality_scale": "bronze",
   "requirements": [],
-  "version": "1.6.1"
+  "version": "1.6.2"
 }
