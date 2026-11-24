@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.1 — 2026-11-24
+
+- **Diagnostics without distances.** The diagnostics download no longer contains distances: the state of the map markers (their distance from the home zone), distance sensors and every distance field are redacted, like the coordinates already were. The points they lead to are public, so a handful of distances was enough to work out where they were measured from. If you posted a diagnostics file publicly, consider removing it.
+- **In the default catalog.** The integration is now listed in the Marketplace default catalog (formerly the HACS default store): search for it in the Marketplace, no custom repository needed. The README's installation section says so.
+
 ## 1.8.0 — 2026-11-24
 
 - **Names the Home Assistant way.** Sensors and map markers are named after their car park below the city's device, so the full name reads *Parkhäuser Bern Bahnhof* (before: *Bahnhof* for the sensor and *Parkhaus – Bahnhof* for the marker). The map markers now belong to the city's device too. The device name comes from the translation files. Entity ids stay the same; names you changed yourself are kept.

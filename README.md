@@ -1,12 +1,13 @@
 # Swiss Parking
 
-[![marketplace_badge](https://img.shields.io/badge/Marketplace-Custom-41BDF5.svg)](https://hacs.xyz/docs/marketplace/)
+[![marketplace_badge](https://img.shields.io/badge/Marketplace-Default-41BDF5.svg)](https://hacs.xyz/docs/marketplace/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/prusuino/ha_swiss_parking)](https://github.com/prusuino/ha_swiss_parking/releases)
 [![Validate](https://github.com/prusuino/ha_swiss_parking/actions/workflows/validate.yml/badge.svg)](https://github.com/prusuino/ha_swiss_parking/actions/workflows/validate.yml)
 [![Tests](https://github.com/prusuino/ha_swiss_parking/actions/workflows/tests.yml/badge.svg)](https://github.com/prusuino/ha_swiss_parking/actions/workflows/tests.yml)
 [![Home Assistant](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fprusuino%2Fha_swiss_parking%2Fmain%2Fhacs.json&query=%24.homeassistant&label=Home%20Assistant&suffix=%2B&color=41BDF5)](https://www.home-assistant.io/)
 [![Quality scale](https://img.shields.io/badge/Quality%20Scale-Bronze-cd7f32.svg)](https://developers.home-assistant.io/docs/core/integration-quality-scale/)
+[![Downloads](https://img.shields.io/github/downloads/prusuino/ha_swiss_parking/total?label=Downloads&color=brightgreen)](https://github.com/prusuino/ha_swiss_parking/releases)
 <a href="https://www.buymeacoffee.com/prusuino"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="20"></a>
 
 ![Swiss Parking](readme_header.png)
@@ -113,13 +114,15 @@ Device names, the status of a car park and the map labels follow your Home Assis
 
 ## Installation
 
-### Home Assistant Marketplace (custom repository)
+### Home Assistant Marketplace (recommended)
 
-1. Open **Settings → Marketplace → ⋮ → Custom repositories** (Home Assistant 2026.11 or newer; on older versions **HACS → ⋮ → Custom repositories**), add `https://github.com/prusuino/ha_swiss_parking` with the category *Integration*, then download **Swiss Parking** — or use the button:
+1. Open **Settings → Marketplace** (Home Assistant 2026.11 or newer; on older versions open **HACS**), search for **"Swiss Parking"** and download it — or use the button, which opens the integration directly in your Marketplace:
 
    [![Open in Marketplace](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=prusuino&repository=ha_swiss_parking&category=integration)
 
 2. Restart Home Assistant.
+
+The integration is listed in the Marketplace default catalog (formerly the HACS default store), so no custom repository is needed.
 
 ### Manual
 
@@ -151,7 +154,7 @@ The integration declares **Bronze** on the [Home Assistant integration quality s
 - Stale data is not shown as live either: the sources' own timestamps are checked. A car park whose record is older than 24 hours reports an unknown number of free spaces (status "unknown") instead of an old one; `last_update` keeps the source's timestamp so you can see how old it is. For Basel, Bern and Frauenfeld, whose feeds are stamped on every publication, every car park is withdrawn this way as soon as the feed as a whole has not been updated for more than 60 minutes. Zürich and Winterthur only re-stamp a car park when its count changes, so a quiet hour without any change is normal there; the 60-minute feed rule is therefore not applied to those two cities, and the per-car-park limit is deliberately generous for the same reason.
 - The `last_update` attribute is ISO 8601 with a time-zone offset for every city (e.g. `2026-08-29T20:37:32+02:00`), whatever format the source uses, so `as_datetime` works on it in templates.
 - A car park that disappears from its city's feed is removed together with its entity-registry entry, so it does not linger as an unavailable "restored" entity. When it reappears under the same unique id, Home Assistant restores its previous entity id and your customizations (name, icon, area, labels, visibility) from its record of deleted entities; older Home Assistant versions create it afresh.
-- **Download diagnostics** (entry menu under **Settings → Devices & services**) gives the entry's configuration, what the integration last fetched and the current state of its entities, with coordinates, credentials and the entry's title and unique id redacted. Entity ids and names stay readable and can contain a place or stop name, so look through the file before attaching it to a public issue.
+- **Download diagnostics** (entry menu under **Settings → Devices & services**) gives the entry's configuration, what the integration last fetched and the current state of its entities, with coordinates, distances, credentials and the entry's title and unique id redacted. Entity ids and names stay readable and can contain a place or stop name, so look through the file before attaching it to a public issue.
 
 ## Data sources & license
 
