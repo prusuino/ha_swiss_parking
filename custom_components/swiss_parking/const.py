@@ -1,6 +1,7 @@
+"""Constants for the Swiss Parking integration."""
 import json
 from pathlib import Path
-"""Constants for the Swiss Parking integration."""
+
 DOMAIN = "swiss_parking"
 
 UPDATE_INTERVAL_MINUTES = 2

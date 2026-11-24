@@ -23,7 +23,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import slugify
 from homeassistant.util.location import distance
 
-from .cleanup import async_remove_entity
+from .cleanup import async_remove_entity, async_remove_orphans
 from .const import CITIES, DOMAIN, STATUS_CLOSED
 from .coordinator import SwissParkingCoordinator
 from .localization import t
@@ -67,10 +67,11 @@ async def async_setup_entry(
             async_add_entities(new_entities)
 
         for garage_id in [g for g in known if g not in garages]:
-            hass.async_create_task(async_remove_entity(hass, known.pop(garage_id)))
+            entry.async_create_task(hass, async_remove_entity(hass, known.pop(garage_id)))
 
     entry.async_on_unload(coordinator.async_add_listener(_sync_entities))
     _sync_entities()
+    async_remove_orphans(hass, entry, "geo_location", known)
 
 
 class GarageEvent(GeolocationEvent):
@@ -136,6 +137,9 @@ class GarageEvent(GeolocationEvent):
         """Refresh label/attributes in place on a coordinator update, so the
         map label stays current without recreating the entity."""
         self._garage = garage
+        self._attr_latitude = garage.get("latitude")
+        self._attr_longitude = garage.get("longitude")
+        self._attr_distance = self._distance_from_home(self._hass_ref, garage)
         if self.hass:
             self.async_write_ha_state()
 

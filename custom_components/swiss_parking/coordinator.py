@@ -10,7 +10,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import CITIES, CONF_CITY, DOMAIN, UPDATE_INTERVAL_MINUTES
 from .issues import IssueReporter
-from .sources import async_fetch_city
+from .sources import FETCH_ERRORS, async_fetch_city
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,6 +22,7 @@ class SwissParkingCoordinator(DataUpdateCoordinator[dict]):
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=entry,
             name=DOMAIN,
             update_interval=timedelta(minutes=UPDATE_INTERVAL_MINUTES),
         )
@@ -32,7 +33,7 @@ class SwissParkingCoordinator(DataUpdateCoordinator[dict]):
         city = CITIES[self.city]["name"]
         try:
             garages = await async_fetch_city(self.hass, self.city)
-        except Exception as err:
+        except FETCH_ERRORS as err:
             self.issues.failure("unreachable", {"city": city})
             raise UpdateFailed(f"Parking feed for {self.city} unreachable: {err}") from err
         if not garages:

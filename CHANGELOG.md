@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.0 — 2026-11-24
+
+- **Requires Home Assistant 2024.11 or newer.** The integration already used features of 2024.5 (the declared minimum said 2024.1, where setup would have failed); it now also hands its config entry to the update coordinator, which needs 2024.11.
+- **No leftover entities after a restart.** A car park that left its city's feed while Home Assistant was not running no longer stays behind as an unavailable entity; its sensor and map marker are removed at the next start, like they already were while running.
+- **Frauenfeld:** the query now reads enough records that no area drops out between two refreshes.
+- **Map markers** follow changed coordinates, and the distance follows a moved home location.
+- **Clearer errors.** Only network and feed errors count as "feed unreachable"; anything else is logged as an error, and the setup dialog shows "Unexpected error" instead of "cannot connect".
+- The quality-scale file now states honestly which rules are not met yet. No change to entities or configuration.
+
 ## 1.6.2 — 2026-11-19
 
 - The Home Assistant Marketplace lists the integration under *Local services* and *Vehicles & transport → Cars & EVs*. The repository is marked as made for Switzerland. Nothing changes in how the integration works.

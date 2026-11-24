@@ -16,7 +16,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
 
-from .cleanup import async_remove_entity
+from .cleanup import async_remove_entity, async_remove_orphans
 from .const import CITIES, DOMAIN, STATUS_CLOSED
 from .coordinator import SwissParkingCoordinator
 from .device import device_info
@@ -45,10 +45,11 @@ async def async_setup_entry(
             async_add_entities(new_entities)
 
         for garage_id in [g for g in known if g not in garages]:
-            hass.async_create_task(async_remove_entity(hass, known.pop(garage_id)))
+            entry.async_create_task(hass, async_remove_entity(hass, known.pop(garage_id)))
 
     entry.async_on_unload(coordinator.async_add_listener(_sync_entities))
     _sync_entities()
+    async_remove_orphans(hass, entry, "sensor", known)
 
 
 class GarageFreeSpacesSensor(CoordinatorEntity[SwissParkingCoordinator], SensorEntity):

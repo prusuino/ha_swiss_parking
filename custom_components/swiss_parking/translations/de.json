@@ -14,7 +14,8 @@
     },
     "error": {
       "cannot_connect": "Der Parkleitsystem-Feed der Stadt ist nicht erreichbar.",
-      "no_garages": "Der Parkleitsystem-Feed der Stadt lieferte keine Parkhäuser."
+      "no_garages": "Der Parkleitsystem-Feed der Stadt lieferte keine Parkhäuser.",
+      "unknown": "Unerwarteter Fehler, siehe Protokoll."
     }
   },
   "issues": {

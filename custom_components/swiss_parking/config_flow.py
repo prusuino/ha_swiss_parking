@@ -2,6 +2,7 @@
 repeatable for the others."""
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import voluptuous as vol
@@ -16,7 +17,9 @@ from homeassistant.helpers.selector import (
 
 from .const import CITIES, CONF_CITY, DOMAIN
 from .localization import t
-from .sources import async_fetch_city
+from .sources import FETCH_ERRORS, async_fetch_city
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class SwissParkingConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -34,8 +37,11 @@ class SwissParkingConfigFlow(ConfigFlow, domain=DOMAIN):
 
             try:
                 garages = await async_fetch_city(self.hass, city)
-            except Exception:
+            except FETCH_ERRORS:
                 errors["base"] = "cannot_connect"
+            except Exception:  # noqa: BLE001 - anything else is a bug, shown as such
+                _LOGGER.exception("Unexpected error while probing the %s feed", city)
+                errors["base"] = "unknown"
             else:
                 if not garages:
                     errors["base"] = "no_garages"

@@ -14,7 +14,8 @@
     },
     "error": {
       "cannot_connect": "Il feed della città non è raggiungibile.",
-      "no_garages": "Il feed della città non ha restituito parcheggi."
+      "no_garages": "Il feed della città non ha restituito parcheggi.",
+      "unknown": "Errore imprevisto, vedere il registro."
     }
   },
   "issues": {

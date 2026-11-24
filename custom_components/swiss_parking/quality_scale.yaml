@@ -23,7 +23,9 @@ rules:
   docs-removal-instructions: done
   entity-event-setup: done
   entity-unique-id: done
-  has-entity-name: done
+  has-entity-name:
+    status: todo
+    comment: Entities carry full names from the integration's own localization helper (has_entity_name is False).
   runtime-data:
     status: done
     comment: The entry's coordinator is entry.runtime_data.
@@ -70,8 +72,12 @@ rules:
   dynamic-devices:
     status: exempt
     comment: One device per city; car parks are entities and map markers.
-  entity-category: done
-  entity-device-class: done
+  entity-category:
+    status: exempt
+    comment: Every entity is a primary reading (free spaces, map marker); none is configuration or diagnostic.
+  entity-device-class:
+    status: exempt
+    comment: Free parking spaces have no matching sensor device class.
   entity-disabled-by-default: todo
   entity-translations:
     status: todo

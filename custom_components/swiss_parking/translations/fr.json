@@ -14,7 +14,8 @@
     },
     "error": {
       "cannot_connect": "Le flux de la ville est injoignable.",
-      "no_garages": "Le flux de la ville n'a renvoyé aucun parking."
+      "no_garages": "Le flux de la ville n'a renvoyé aucun parking.",
+      "unknown": "Erreur inattendue, voir le journal."
     }
   },
   "issues": {

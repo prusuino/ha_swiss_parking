@@ -30,9 +30,8 @@ import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone, tzinfo
 from email.utils import parsedate_to_datetime
-from functools import lru_cache
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+import aiohttp
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import dt as dt_util
@@ -61,9 +60,13 @@ WINTERTHUR_URL = (
     "?Service=WFS&Version=1.1.0&Request=GetFeature&TypeName=ms:ParkleitsystemLayer"
 )
 BERN_URL = "https://www.parking-bern.ch/parkdata.xml"
+# What a feed can raise when it is down, slow or answers with something
+# unexpected. Anything else is a bug and must not be hidden as "unreachable".
+FETCH_ERRORS = (aiohttp.ClientError, OSError, ET.ParseError, ValueError, KeyError, TypeError)
+
 FRAUENFELD_URL = (
     "https://data.tg.ch/api/explore/v2.1/catalog/datasets/frauenfeld-1/records"
-    "?limit=40&order_by=-timestamp"
+    "?limit=100&order_by=-timestamp"
 )
 
 # The Bern feed identifies most garages only by code (P01...P10). Names and
@@ -109,12 +112,10 @@ def _int_or_none(value) -> int | None:
 SOURCE_TIME_ZONE = "Europe/Zurich"
 
 
-@lru_cache(maxsize=1)
 def _source_tzinfo() -> tzinfo:
-    try:
-        return ZoneInfo(SOURCE_TIME_ZONE)
-    except ZoneInfoNotFoundError:  # no tz database on this host
-        return timezone.utc
+    # Home Assistant's cached helper; async_fetch_city() loads the zone in the
+    # executor first, so no tz file is read in the event loop.
+    return dt_util.get_time_zone(SOURCE_TIME_ZONE) or timezone.utc
 
 
 def parse_timestamp(value) -> datetime | None:
@@ -381,5 +382,6 @@ async def async_fetch_city(hass: HomeAssistant, city: str) -> dict[str, dict]:
     """Fetch and normalize one city's garages. Raises on network errors;
     a single malformed garage entry is skipped, never fatal. Numbers whose
     source timestamp is too old are withdrawn (see mark_stale)."""
+    await dt_util.async_get_time_zone(SOURCE_TIME_ZONE)  # cached after the first call
     garages = await CITY_FETCHERS[city](hass)
     return mark_stale(garages, dt_util.utcnow(), feed_cutoff=city in FEED_STAMPED_CITIES)

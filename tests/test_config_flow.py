@@ -36,6 +36,9 @@ async def test_unreachable_and_empty_feed(hass: HomeAssistant, enable_custom_int
     with patch(FLOW + "async_fetch_city", return_value={}):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_CITY: CITY_BERN})
     assert result["errors"] == {"base": "no_garages"}
+    with patch(FLOW + "async_fetch_city", side_effect=RuntimeError("bug")):
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_CITY: CITY_BERN})
+    assert result["errors"] == {"base": "unknown"}
 
 
 async def test_one_entry_per_city(hass: HomeAssistant, enable_custom_integrations) -> None:
