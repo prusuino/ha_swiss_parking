@@ -64,7 +64,7 @@ One config entry per city (add the integration again for another city):
 
 | Entity | Type | Description |
 |---|---|---|
-| `sensor.parking_<city>_<garage>` | Sensor | State = currently free spaces of one car park. Attributes: localized status (open/closed/unknown), capacity, occupancy %, address, link, coordinates, last update (ISO 8601). |
+| `sensor.parking_<city>_<garage>` | Sensor | State = currently free spaces of one car park. Attributes: status (`open` / `closed` / `unknown`, shown translated in the UI), capacity, occupancy %, address, link, coordinates, last update (ISO 8601). |
 | `geo_location.parking_<city>_<garage>` (markers created before 1.3.0 keep their localized id — see [Addressing the map markers](#addressing-the-map-markers)) | Geo-location | One map marker per car park with known coordinates, labeled with the live number of free spaces ("158 free") or "Closed", refreshed in place on every update; the marker goes unavailable while the city's feed is unreachable. State = distance from your Home Assistant home zone (km). Attributes: status label, free, total, address, link, last update (ISO 8601). Zürich's feed contains no coordinates, so Zürich creates sensors only. Frauenfeld reports open surface lots (no open/closed state). |
 
 Data refreshes every 2 minutes. Garages appearing in or disappearing from a feed are picked up automatically.
@@ -109,7 +109,7 @@ The map markers are hidden from Home Assistant's auto-generated default dashboar
 
 ## Language
 
-Entity and device names as well as status values adapt automatically to your Home Assistant language setting — German, English, French, and Italian are supported, with English as the fallback. Garage names from the sources are shown as-is.
+Device names, the status of a car park and the map labels follow your Home Assistant language — German, English, French, and Italian are supported, with English as the fallback. Every sensor and map marker is named after its car park as the city's feed spells it, below the city's device (for example *Parkhäuser Bern Bahnhof*). Entity ids do not depend on the language.
 
 ## Installation
 

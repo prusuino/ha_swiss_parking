@@ -23,5 +23,26 @@
       "title": "Swiss Parking : flux de {city} injoignable",
       "description": "Le flux de stationnement de {city} n'a pas répondu, ou n'a renvoyé aucun parking, lors de plusieurs actualisations consécutives. Vérifie ta connexion internet ; si elle fonctionne, le flux de la ville lui-même est en panne. Les capteurs et les marqueurs de carte restent indisponibles jusque-là et se rétablissent d'eux-mêmes ; cet avis disparaît à la prochaine actualisation réussie."
     }
+  },
+  "device": {
+    "city": {
+      "name": "Parkings {city}"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "free_spaces": {
+        "state_attributes": {
+          "status": {
+            "name": "Statut",
+            "state": {
+              "open": "Ouvert",
+              "closed": "Fermé",
+              "unknown": "Inconnu"
+            }
+          }
+        }
+      }
+    }
   }
 }

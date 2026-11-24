@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.0 — 2026-11-24
+
+- **Names the Home Assistant way.** Sensors and map markers are named after their car park below the city's device, so the full name reads *Parkhäuser Bern Bahnhof* (before: *Bahnhof* for the sensor and *Parkhaus – Bahnhof* for the marker). The map markers now belong to the city's device too. The device name comes from the translation files. Entity ids stay the same; names you changed yourself are kept.
+- **Status attribute is a fixed value.** The `status` attribute of the sensors is now `open`, `closed` or `unknown` in every language and is shown translated in the UI. ⚠️ Templates or automations that compared it with a translated word (for example `Offen`) need the new value. The map label is unchanged.
+
 ## 1.7.0 — 2026-11-24
 
 - **Requires Home Assistant 2024.11 or newer.** The integration already used features of 2024.5 (the declared minimum said 2024.1, where setup would have failed); it now also hands its config entry to the update coordinator, which needs 2024.11.

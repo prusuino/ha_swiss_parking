@@ -47,7 +47,7 @@ class SwissParkingConfigFlow(ConfigFlow, domain=DOMAIN):
                     errors["base"] = "no_garages"
                 else:
                     return self.async_create_entry(
-                        title=t("device_name", self.hass, city=CITIES[city]["name"]),
+                        title=t("entry_title", self.hass, city=CITIES[city]["name"]),
                         data={CONF_CITY: city},
                     )
 

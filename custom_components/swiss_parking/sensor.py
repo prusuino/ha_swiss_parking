@@ -17,10 +17,9 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
 
 from .cleanup import async_remove_entity, async_remove_orphans
-from .const import CITIES, DOMAIN, STATUS_CLOSED
+from .const import CITIES, DOMAIN, STATUS_CLOSED, STATUS_UNKNOWN
 from .coordinator import SwissParkingCoordinator
 from .device import device_info
-from .localization import localized_status, t
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,9 +52,13 @@ async def async_setup_entry(
 
 
 class GarageFreeSpacesSensor(CoordinatorEntity[SwissParkingCoordinator], SensorEntity):
-    """Free spaces of one garage; everything else as attributes."""
+    """Free spaces of one garage; everything else as attributes. Named
+    after the car park (as the feed spells it) under the city's device, so
+    the full name reads "Parkhäuser Bern Bahnhof"; the translation key
+    translates the status attribute."""
 
-    _attr_has_entity_name = False
+    _attr_has_entity_name = True
+    _attr_translation_key = "free_spaces"
     _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(
@@ -67,7 +70,6 @@ class GarageFreeSpacesSensor(CoordinatorEntity[SwissParkingCoordinator], SensorE
         city_slug: str,
     ) -> None:
         super().__init__(coordinator)
-        self._hass_ref = hass
         self._garage_id = garage_id
         garage = (coordinator.data or {}).get(garage_id, {})
         self._attr_name = garage.get("name") or garage_id
@@ -104,7 +106,7 @@ class GarageFreeSpacesSensor(CoordinatorEntity[SwissParkingCoordinator], SensorE
         if total and free is not None and total > 0:
             occupancy = round((total - free) * 100 / total)
         return {
-            "status": localized_status(garage.get("status"), self._hass_ref),
+            "status": garage.get("status") or STATUS_UNKNOWN,
             "total": total,
             "occupancy_percent": occupancy,
             "address": garage.get("address"),

@@ -26,6 +26,7 @@ from homeassistant.util.location import distance
 from .cleanup import async_remove_entity, async_remove_orphans
 from .const import CITIES, DOMAIN, STATUS_CLOSED
 from .coordinator import SwissParkingCoordinator
+from .device import device_info
 from .localization import t
 
 _LOGGER = logging.getLogger(__name__)
@@ -83,7 +84,7 @@ class GarageEvent(GeolocationEvent):
     _attr_should_poll = False
     _attr_source = SOURCE
     _attr_unit_of_measurement = UnitOfLength.KILOMETERS
-    _attr_has_entity_name = False
+    _attr_has_entity_name = True
     # Hidden from Home Assistant's auto-generated default dashboard map (which
     # otherwise draws every geo_location entity in the system) — still shown
     # on a Map card that references them by source, which does not go through
@@ -110,13 +111,13 @@ class GarageEvent(GeolocationEvent):
         # feeds list the same garage each keep their own marker instead of
         # fighting over one registry entry.
         self._attr_unique_id = f"{entry.entry_id}_{garage_id}"
-        prefix = t("garage_entity_prefix", hass)
+        # Named after the car park under the city's device, like its sensor.
         name = garage.get("name") or garage_id
-        self._attr_name = f"{prefix} – {name}"
+        self._attr_name = name
+        self._attr_device_info = device_info(hass, entry)
         # Suggested id, language-independent like the sensors' and applied only
         # when the marker is first registered; the city slug is the per-entry
-        # discriminator (one config entry per city). The friendly name above
-        # keeps the localized prefix.
+        # discriminator (one config entry per city).
         self.entity_id = f"geo_location.parking_{city_slug}_{slugify(name)}"
         self._attr_latitude = garage.get("latitude")
         self._attr_longitude = garage.get("longitude")

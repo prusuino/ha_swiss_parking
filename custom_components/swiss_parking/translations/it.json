@@ -23,5 +23,26 @@
       "title": "Swiss Parking: feed di {city} non raggiungibile",
       "description": "Il feed dei parcheggi di {city} non ha risposto, o non ha restituito alcun parcheggio, per diversi aggiornamenti consecutivi. Controlla la connessione internet; se funziona, è il feed della città stesso a essere guasto. I sensori e i marcatori sulla mappa restano non disponibili fino ad allora e si ripristinano da soli; questo avviso scompare con il prossimo aggiornamento riuscito."
     }
+  },
+  "device": {
+    "city": {
+      "name": "Parcheggi {city}"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "free_spaces": {
+        "state_attributes": {
+          "status": {
+            "name": "Stato",
+            "state": {
+              "open": "Aperto",
+              "closed": "Chiuso",
+              "unknown": "Sconosciuto"
+            }
+          }
+        }
+      }
+    }
   }
 }

@@ -73,3 +73,37 @@ def test_frauenfeld_query_reads_enough_records() -> None:
 def test_swiss_time_for_bern_timestamps() -> None:
     parsed = sources.parse_timestamp("24.11.2026 07:00:00")
     assert parsed is not None and parsed.utcoffset().total_seconds() == 3600
+
+
+async def test_names_below_the_city_device(hass: HomeAssistant, enable_custom_integrations) -> None:
+    """Sensor and marker are named after the car park below the city's device
+    (translated device name), the ids stay language-independent and the
+    status attribute is the fixed key."""
+    from homeassistant.helpers import device_registry as dr
+
+    hass.config.language = "de"
+    entry = MockConfigEntry(domain=DOMAIN, unique_id=CITY_BERN, title="Bern", data={CONF_CITY: CITY_BERN})
+    entry.add_to_hass(hass)
+    garage = _garage("p01", 46.9497, 7.4385) | {"name": "Bahnhof", "status": "closed"}
+    with patch(FETCH, return_value={"p01": garage}):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    registry = er.async_get(hass)
+    sensor_id = registry.async_get_entity_id("sensor", DOMAIN, f"{entry.entry_id}_p01")
+    marker_id = registry.async_get_entity_id("geo_location", DOMAIN, f"{entry.entry_id}_p01")
+    assert sensor_id == "sensor.parking_bern_bahnhof"
+    assert marker_id == "geo_location.parking_bern_bahnhof"
+
+    devices = dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)
+    assert len(devices) == 1
+    device = devices[0]
+    assert device.name == "Parkhäuser Bern"  # from the translations
+    for entity_id in (sensor_id, marker_id):
+        row = registry.async_get(entity_id)
+        assert row.has_entity_name and row.original_name == "Bahnhof"
+        assert row.device_id == device.id
+    sensor = hass.states.get(sensor_id)
+    assert sensor.attributes["status"] == "closed"
+    assert sensor.attributes["friendly_name"].endswith("Bahnhof")
+    assert hass.states.get(marker_id).attributes["status"] == "Geschlossen"  # map label stays localized

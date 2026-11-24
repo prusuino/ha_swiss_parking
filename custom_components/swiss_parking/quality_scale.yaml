@@ -9,7 +9,7 @@ rules:
   brands: done
   common-modules:
     status: done
-    comment: sources.py (one adapter per city), coordinator.py, device.py and localization.py hold the shared pieces.
+    comment: sources.py (one adapter per city), coordinator.py and device.py hold the shared pieces.
   config-flow: done
   config-flow-test-coverage: done
   dependency-transparency:
@@ -23,9 +23,7 @@ rules:
   docs-removal-instructions: done
   entity-event-setup: done
   entity-unique-id: done
-  has-entity-name:
-    status: todo
-    comment: Entities carry full names from the integration's own localization helper (has_entity_name is False).
+  has-entity-name: done
   runtime-data:
     status: done
     comment: The entry's coordinator is entry.runtime_data.
@@ -80,8 +78,8 @@ rules:
     comment: Free parking spaces have no matching sensor device class.
   entity-disabled-by-default: todo
   entity-translations:
-    status: todo
-    comment: Entity names come from the integration's own localization helper, not from translation keys.
+    status: exempt
+    comment: Every entity is named after its car park as the city's feed spells it; the device name and the status attribute are translated.
   exception-translations: todo
   icon-translations: todo
   reconfiguration-flow:
