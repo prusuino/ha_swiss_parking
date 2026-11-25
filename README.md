@@ -17,7 +17,7 @@ A Home Assistant custom integration that shows the live number of free parking s
 ## Highlights
 
 - **Free spaces, live**: one sensor per car park with status, capacity and occupancy, refreshed every 2 minutes from the city's official parking-guidance system.
-- **Five cities so far**: Zürich, Basel, Winterthur, Bern and Frauenfeld — one entry per city.
+- **Six cities so far**: Zürich, Basel, Winterthur, Bern, Frauenfeld and St. Gallen — one entry per city.
 - **On the map**: a marker per car park, labelled with the number of free spaces, with a fixed entity id that is the same in every language.
 - **Follows the city**: car parks that appear in or disappear from a feed are picked up automatically.
 - **Honest about age**: a record older than 24 hours is not shown as live, and every city reports its last update in the same ISO 8601 form.
@@ -49,13 +49,14 @@ More Home Assistant integrations from the same author:
 
 | City | Car parks | Source |
 |---|---|---|
-| Zürich | ~36 | PLS Parkleitsystem Stadt Zürich (RSS, CC-0) |
-| Basel | 16 | Kanton Basel-Stadt open data portal (JSON) |
+| Zürich | ~37 | PLS Parkleitsystem Stadt Zürich (RSS, CC-0) |
+| Basel | 17 | Kanton Basel-Stadt open data portal (JSON) |
 | Winterthur | 13 | Stadtplan Winterthur (WFS) |
 | Bern | ~12 | Berner Parkhäuser (XML) |
-| Frauenfeld | 6 | Stadt Frauenfeld / Kanton Thurgau open data portal (JSON) |
+| Frauenfeld | 7 | Stadt Frauenfeld / Kanton Thurgau open data portal (JSON) |
+| St. Gallen | 14 | City of St. Gallen open data portal (JSON, CC BY-NC 4.0) |
 
-There is no national aggregator for parking data in Switzerland — each city publishes its own feed in its own format, so each city has its own small adapter. Other cities either publish no machine-readable real-time feed at all, or their feed was found dead at the time of writing (St. Gallen) or requires an access token (Geneva). New adapters are welcome — open an issue if your city publishes a feed.
+There is no national aggregator for parking data in Switzerland — each city publishes its own feed in its own format, so each city has its own small adapter. Other cities either publish no machine-readable real-time feed at all, or their feed requires an access token (Geneva). New adapters are welcome — open an issue if your city publishes a feed.
 
 ## What it provides
 
@@ -138,7 +139,7 @@ The integration is listed in the Marketplace default catalog (formerly the HACS 
 ## Removal
 
 1. **Settings → Devices & services → Swiss Parking**, open the entry's menu (⋮) and choose **Delete**; repeat for every city. The entities, their history, the map markers and the device go with the entry.
-2. Remove the integration itself in the **Marketplace** (or HACS; it was added as a custom repository), then restart Home Assistant. With a manual installation, delete `custom_components/swiss_parking` instead.
+2. Remove the integration itself in the **Marketplace** (or HACS), then restart Home Assistant. With a manual installation, delete `custom_components/swiss_parking` instead.
 
 ## Quality scale
 
@@ -151,14 +152,14 @@ The integration declares **Bronze** on the [Home Assistant integration quality s
 - Capacity ("total") is not reported by every source for every garage; the occupancy percentage attribute is only set where it is.
 - A malformed entry in a source feed is skipped and never breaks the whole update.
 - If a city's feed is unreachable, its sensors and map markers go unavailable rather than showing stale numbers; they recover on the next successful update.
-- Stale data is not shown as live either: the sources' own timestamps are checked. A car park whose record is older than 24 hours reports an unknown number of free spaces (status "unknown") instead of an old one; `last_update` keeps the source's timestamp so you can see how old it is. For Basel, Bern and Frauenfeld, whose feeds are stamped on every publication, every car park is withdrawn this way as soon as the feed as a whole has not been updated for more than 60 minutes. Zürich and Winterthur only re-stamp a car park when its count changes, so a quiet hour without any change is normal there; the 60-minute feed rule is therefore not applied to those two cities, and the per-car-park limit is deliberately generous for the same reason.
+- Stale data is not shown as live either: the sources' own timestamps are checked. A car park whose record is older than 24 hours reports an unknown number of free spaces (status "unknown") instead of an old one; `last_update` keeps the source's timestamp so you can see how old it is. For Basel, Bern, Frauenfeld and St. Gallen, whose feeds are stamped on every publication, every car park is withdrawn this way as soon as the feed as a whole has not been updated for more than 60 minutes. Zürich and Winterthur only re-stamp a car park when its count changes, so a quiet hour without any change is normal there; the 60-minute feed rule is therefore not applied to those two cities, and the per-car-park limit is deliberately generous for the same reason.
 - The `last_update` attribute is ISO 8601 with a time-zone offset for every city (e.g. `2026-08-29T20:37:32+02:00`), whatever format the source uses, so `as_datetime` works on it in templates.
 - A car park that disappears from its city's feed is removed together with its entity-registry entry, so it does not linger as an unavailable "restored" entity. When it reappears under the same unique id, Home Assistant restores its previous entity id and your customizations (name, icon, area, labels, visibility) from its record of deleted entities; older Home Assistant versions create it afresh.
 - **Download diagnostics** (entry menu under **Settings → Devices & services**) gives the entry's configuration, what the integration last fetched and the current state of its entities, with coordinates, distances, credentials and the entry's title and unique id redacted. Entity ids and names stay readable and can contain a place or stop name, so look through the file before attaching it to a public issue.
 
 ## Data sources & license
 
-See [NOTICE.md](NOTICE.md) for the per-city data sources and their attribution requirements. The integration sets the appropriate `attribution` attribute on every entity. For Bern, the operator requires a link to [www.parking-bern.ch](https://www.parking-bern.ch) — the integration carries it as an entity attribute; please keep it visible if you republish the data.
+See [NOTICE.md](NOTICE.md) for the per-city data sources and their attribution requirements. The integration sets the appropriate `attribution` attribute on every entity. For Bern, the operator requires a link to [www.parking-bern.ch](https://www.parking-bern.ch) — the integration carries it as an entity attribute; please keep it visible if you republish the data. The St. Gallen data is licensed [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/): it may not be used commercially.
 
 ## Disclaimer
 

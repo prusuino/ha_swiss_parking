@@ -21,6 +21,7 @@ CITY_BASEL = "basel"
 CITY_WINTERTHUR = "winterthur"
 CITY_BERN = "bern"
 CITY_FRAUENFELD = "frauenfeld"
+CITY_STGALLEN = "stgallen"
 
 # Every supported city with its display name and per-source attribution.
 # One config entry per city; the adapter functions live in sources.py.
@@ -45,6 +46,11 @@ CITIES = {
     CITY_FRAUENFELD: {
         "name": "Frauenfeld",
         "attribution": "Data: Stadt Frauenfeld / Kanton Thurgau (data.tg.ch)",
+    },
+    CITY_STGALLEN: {
+        "name": "St. Gallen",
+        # CC BY-NC 4.0: name the publisher and the licence.
+        "attribution": "Data: PLS Parkleitsystem St.Gallen AG / Stadt St.Gallen (daten.stadt.sg.ch, CC BY-NC 4.0)",
     },
 }
 

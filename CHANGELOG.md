@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.0 — unreleased
+
+- **New city: St. Gallen.** 14 car parks with free spaces, capacity, status and map markers, from the city's open data portal, which publishes the parking-guidance data again (PLS Parkleitsystem St.Gallen AG, CC BY-NC 4.0: no commercial use). Add the integration again and pick St. Gallen. An area the system does not count (currently Spelteriniplatz) has no number.
+- Nothing changes for the other cities.
+
 ## 1.8.1 — 2026-11-24
 
 - **Diagnostics without distances.** The diagnostics download no longer contains distances: the state of the map markers (their distance from the home zone), distance sensors and every distance field are redacted, like the coordinates already were. The points they lead to are public, so a handful of distances was enough to work out where they were measured from. If you posted a diagnostics file publicly, consider removing it.

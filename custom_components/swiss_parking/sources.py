@@ -41,6 +41,7 @@ from .const import (
     CITY_BASEL,
     CITY_BERN,
     CITY_FRAUENFELD,
+    CITY_STGALLEN,
     CITY_WINTERTHUR,
     CITY_ZURICH,
     FETCH_TIMEOUT_SECONDS,
@@ -67,6 +68,11 @@ FETCH_ERRORS = (aiohttp.ClientError, OSError, ET.ParseError, ValueError, KeyErro
 FRAUENFELD_URL = (
     "https://data.tg.ch/api/explore/v2.1/catalog/datasets/frauenfeld-1/records"
     "?limit=100&order_by=-timestamp"
+)
+
+STGALLEN_URL = (
+    "https://daten.stadt.sg.ch/api/explore/v2.1/catalog/datasets/"
+    "freie-parkplatze-in-der-stadt-stgallen-pls/records?limit=100"
 )
 
 # The Bern feed identifies most garages only by code (P01...P10). Names and
@@ -360,22 +366,54 @@ async def fetch_frauenfeld(hass: HomeAssistant) -> dict[str, dict]:
     return garages
 
 
+async def fetch_stgallen(hass: HomeAssistant) -> dict[str, dict]:
+    """PLS Parkleitsystem St.Gallen AG via the city's open data portal
+    (daten.stadt.sg.ch, CC BY-NC 4.0). One record per car park with status,
+    capacity and coordinates. Uncounted areas have neither capacity nor count."""
+    data = await _fetch_json(hass, STGALLEN_URL)
+
+    garages: dict[str, dict] = {}
+    for entry in data.get("results", []):
+        name = (entry.get("ph_name") or "").strip()
+        garage_id = str(entry.get("ph_id") or "").strip() or slugify(name)
+        if not name or not garage_id:
+            continue
+        coords = entry.get("koordinaten") or {}
+        status = {"offen": STATUS_OPEN, "geschlossen": STATUS_CLOSED}.get(
+            (entry.get("ph_status") or "").lower(), STATUS_UNKNOWN
+        )
+        garages[garage_id] = {
+            "id": garage_id,
+            "name": name,
+            "free": _int_or_none(entry.get("frei")),
+            "total": _int_or_none(entry.get("anzahl_parkplatze")),
+            "status": status,
+            "latitude": coords.get("lat"),
+            "longitude": coords.get("lon"),
+            "address": None,
+            "link": "https://daten.stadt.sg.ch/explore/dataset/freie-parkplatze-in-der-stadt-stgallen-pls/",
+            "last_update": _timestamp(entry.get("letzte_aktualisierung")),
+        }
+    return garages
+
+
 CITY_FETCHERS = {
     CITY_ZURICH: fetch_zurich,
     CITY_BASEL: fetch_basel,
     CITY_WINTERTHUR: fetch_winterthur,
     CITY_BERN: fetch_bern,
     CITY_FRAUENFELD: fetch_frauenfeld,
+    CITY_STGALLEN: fetch_stgallen,
 }
 
 # Feeds whose stamps move with every publication, so a newest stamp older
 # than STALE_FEED_MINUTES really means the feed is dead: Basel stamps all its
 # records with one "published" time, Bern carries a feed-level "updated",
-# Frauenfeld's history dataset adds a row per publication. Zürich and
-# Winterthur re-stamp a garage only when its count changes — a correct feed
+# Frauenfeld's history dataset adds a row per publication, St. Gallen stamps
+# its records with every export. Zürich and Winterthur re-stamp a garage only when its count changes — a correct feed
 # there carries stamps hours or days old — so they get the per-garage cutoff
 # alone (see mark_stale).
-FEED_STAMPED_CITIES = frozenset({CITY_BASEL, CITY_BERN, CITY_FRAUENFELD})
+FEED_STAMPED_CITIES = frozenset({CITY_BASEL, CITY_BERN, CITY_FRAUENFELD, CITY_STGALLEN})
 
 
 async def async_fetch_city(hass: HomeAssistant, city: str) -> dict[str, dict]:

@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from custom_components.swiss_parking.const import STATUS_CLOSED, STATUS_OPEN, STATUS_UNKNOWN
-from custom_components.swiss_parking.sources import _int_or_none, fetch_zurich, mark_stale, parse_timestamp
+from custom_components.swiss_parking.sources import FEED_STAMPED_CITIES, _int_or_none, fetch_stgallen, fetch_zurich, mark_stale, parse_timestamp
 
 NOW = datetime(2026, 11, 9, 10, 0, tzinfo=timezone.utc)
 
@@ -77,3 +77,29 @@ async def test_zurich_adapter():
     assert garages["urania"]["id"] == "urania"  # no pid in the link: the slug of the name
     assert garages["nowhere"]["status"] == STATUS_UNKNOWN and garages["nowhere"]["free"] is None
     assert garages["nowhere"]["address"] is None and garages["nowhere"]["last_update"] is None
+
+
+STGALLEN = {"results": [
+    {"ph_id": "33", "ph_name": "Parkhaus Einstein", "ph_status": "offen", "anzahl_parkplatze": 187, "frei": 127,
+     "koordinaten": {"lon": 9.37422, "lat": 47.42177}, "letzte_aktualisierung": "2026-11-25T21:40:00+00:00"},
+    {"ph_id": "52", "ph_name": "Parkplatz Spelteriniplatz", "ph_status": "geschlossen", "anzahl_parkplatze": None,
+     "frei": None, "koordinaten": None, "letzte_aktualisierung": None},
+    {"ph_id": "central", "ph_name": "Parkhaus Central", "ph_status": None, "anzahl_parkplatze": 491, "frei": 0},
+    {"ph_id": "99", "ph_name": ""},
+]}
+
+
+@pytest.mark.asyncio
+async def test_stgallen_adapter():
+    with patch("custom_components.swiss_parking.sources._fetch_json", AsyncMock(return_value=STGALLEN)):
+        garages = await fetch_stgallen(None)
+    assert set(garages) == {"33", "52", "central"}  # the record without a name is skipped
+    einstein = garages["33"]
+    assert (einstein["free"], einstein["total"], einstein["status"]) == (127, 187, STATUS_OPEN)
+    assert (einstein["latitude"], einstein["longitude"]) == (47.42177, 9.37422)
+    assert einstein["last_update"] == "2026-11-25T21:40:00+00:00"
+    uncounted = garages["52"]
+    assert uncounted["free"] is None and uncounted["total"] is None and uncounted["latitude"] is None
+    assert uncounted["status"] == STATUS_CLOSED and uncounted["last_update"] is None
+    assert garages["central"]["status"] == STATUS_UNKNOWN and garages["central"]["free"] == 0
+    assert "stgallen" in FEED_STAMPED_CITIES
