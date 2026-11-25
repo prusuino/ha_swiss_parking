@@ -3,6 +3,7 @@
 ## 1.9.0 — unreleased
 
 - **New city: St. Gallen.** 14 car parks with free spaces, capacity, status and map markers, from the city's open data portal, which publishes the parking-guidance data again (PLS Parkleitsystem St.Gallen AG, CC BY-NC 4.0: no commercial use). Add the integration again and pick St. Gallen. An area the system does not count (currently Spelteriniplatz) has no number.
+- **SBB P+Rail.** Choose it in the list of cities and pick from more than 430 railway stations: one sensor per station with the estimated occupancy of its car park in percent, the load level, the capacity and the typical next 24 hours, plus a map marker. The SBB estimates the occupancy, it does not count free spaces. Refreshed every 30 minutes; the stations can be changed under *Configure*.
 - Nothing changes for the other cities.
 
 ## 1.8.1 — 2026-11-24

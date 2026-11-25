@@ -3,16 +3,43 @@
     "step": {
       "user": {
         "title": "Swiss Parking",
-        "description": "Live free parking spaces from the parking guidance system of a Swiss city. One entry per city — add the integration again for another city. Currently supported: Zürich, Basel, Winterthur, Bern, Frauenfeld, St. Gallen.",
+        "description": "Live free parking spaces from the parking guidance system of a Swiss city. One entry per city — add the integration again for another city. Currently supported: Zürich, Basel, Winterthur, Bern, Frauenfeld, St. Gallen. The car parks at railway stations are offered as SBB P+Rail (estimated occupancy).",
         "data": {
           "city": "City"
+        }
+      },
+      "stations": {
+        "title": "SBB P+Rail: stations",
+        "description": "Pick the stations to watch. The occupancy is an estimate by the SBB, refreshed every half hour; free spaces are not counted. Only stations with an estimate are listed.",
+        "data": {
+          "stations": "Stations"
         }
       }
     },
     "abort": {
-      "already_configured": "This city is already configured."
+      "already_configured": "The city or P+Rail is already configured."
     },
     "error": {
+      "cannot_connect": "The city's parking feed could not be reached.",
+      "no_garages": "The city's parking feed returned no garages.",
+      "unknown": "Unexpected error, see the log.",
+      "no_stations": "Pick at least one station."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SBB P+Rail: stations",
+        "description": "Pick the stations to watch. The occupancy is an estimate by the SBB, refreshed every half hour; free spaces are not counted. Only stations with an estimate are listed.",
+        "data": {
+          "stations": "Stations"
+        }
+      }
+    },
+    "error": {
+      "no_stations": "Pick at least one station."
+    },
+    "abort": {
       "cannot_connect": "The city's parking feed could not be reached.",
       "no_garages": "The city's parking feed returned no garages.",
       "unknown": "Unexpected error, see the log."
@@ -27,6 +54,9 @@
   "device": {
     "city": {
       "name": "Car parks {city}"
+    },
+    "prail": {
+      "name": "SBB P+Rail"
     }
   },
   "entity": {
@@ -38,6 +68,19 @@
             "state": {
               "open": "Open",
               "closed": "Closed",
+              "unknown": "Unknown"
+            }
+          }
+        }
+      },
+      "estimated_occupancy": {
+        "state_attributes": {
+          "level": {
+            "name": "Estimated load",
+            "state": {
+              "low": "Low",
+              "medium": "Medium",
+              "high": "High",
               "unknown": "Unknown"
             }
           }

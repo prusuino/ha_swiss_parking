@@ -1,6 +1,6 @@
 # Data Sources & Attribution
 
-This integration retrieves live parking data at runtime from the public parking-guidance feeds of the supported Swiss cities. There is no national aggregator — each city publishes its own feed under its own terms:
+This integration retrieves live parking data at runtime from the public parking-guidance feeds of the supported Swiss cities and, for SBB P+Rail, from opentransportdata.swiss. There is no national aggregator — each city publishes its own feed under its own terms:
 
 | City | Source | Terms |
 |---|---|---|
@@ -10,6 +10,7 @@ This integration retrieves live parking data at runtime from the public parking-
 | Bern | [Berner Parkhäuser](https://www.parking-bern.ch/) XML interface | Free to use with a **link to www.parking-bern.ch**; resale of the data is prohibited |
 | Frauenfeld | [Kanton Thurgau open data portal](https://data.tg.ch/explore/dataset/frauenfeld-1/) (Stadt Frauenfeld) | Open data of Kanton Thurgau, attribution requested |
 | St. Gallen | [City of St. Gallen open data portal](https://daten.stadt.sg.ch/explore/dataset/freie-parkplatze-in-der-stadt-stgallen-pls/) (PLS Parkleitsystem St.Gallen AG) | **[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)**: attribution, **no commercial use** |
+| SBB P+Rail | [bike-and-car-parking on opentransportdata.swiss](https://data.opentransportdata.swiss/dataset/bike-and-car-parking) (SBB) | Open use with **source attribution** |
 
 The integration fulfills the attribution requirements by setting the `attribution` attribute on every entity it creates (e.g. `"Data: Berner Parkhäuser (www.parking-bern.ch)"`), which Home Assistant surfaces in the entity's "More Info" dialog, and by carrying the source link as an entity attribute where available. If you build dashboards, automations, or republish this data elsewhere, please keep the respective attribution visible — for Bern in particular, keep a link to www.parking-bern.ch, and do not use the St. Gallen data commercially.
 

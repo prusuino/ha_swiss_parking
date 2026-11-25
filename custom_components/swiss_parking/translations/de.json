@@ -3,16 +3,43 @@
     "step": {
       "user": {
         "title": "Swiss Parking",
-        "description": "Freie Parkplätze in Echtzeit aus dem Parkleitsystem einer Schweizer Stadt. Ein Eintrag pro Stadt — Integration erneut hinzufügen für eine weitere Stadt. Aktuell unterstützt: Zürich, Basel, Winterthur, Bern, Frauenfeld, St. Gallen.",
+        "description": "Freie Parkplätze in Echtzeit aus dem Parkleitsystem einer Schweizer Stadt. Ein Eintrag pro Stadt — Integration erneut hinzufügen für eine weitere Stadt. Aktuell unterstützt: Zürich, Basel, Winterthur, Bern, Frauenfeld, St. Gallen. Die Parkplätze an Bahnhöfen stehen als SBB P+Rail zur Wahl (geschätzte Auslastung).",
         "data": {
           "city": "Stadt"
+        }
+      },
+      "stations": {
+        "title": "SBB P+Rail: Bahnhöfe",
+        "description": "Wähle die Bahnhöfe. Die Auslastung ist eine Schätzung der SBB und wird halbstündlich aktualisiert; freie Plätze werden nicht gezählt. Nur Bahnhöfe mit einer Schätzung stehen in der Liste.",
+        "data": {
+          "stations": "Bahnhöfe"
         }
       }
     },
     "abort": {
-      "already_configured": "Diese Stadt ist bereits eingerichtet."
+      "already_configured": "Diese Stadt oder P+Rail ist bereits eingerichtet."
     },
     "error": {
+      "cannot_connect": "Der Parkleitsystem-Feed der Stadt ist nicht erreichbar.",
+      "no_garages": "Der Parkleitsystem-Feed der Stadt lieferte keine Parkhäuser.",
+      "unknown": "Unerwarteter Fehler, siehe Protokoll.",
+      "no_stations": "Wähle mindestens einen Bahnhof."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SBB P+Rail: Bahnhöfe",
+        "description": "Wähle die Bahnhöfe. Die Auslastung ist eine Schätzung der SBB und wird halbstündlich aktualisiert; freie Plätze werden nicht gezählt. Nur Bahnhöfe mit einer Schätzung stehen in der Liste.",
+        "data": {
+          "stations": "Bahnhöfe"
+        }
+      }
+    },
+    "error": {
+      "no_stations": "Wähle mindestens einen Bahnhof."
+    },
+    "abort": {
       "cannot_connect": "Der Parkleitsystem-Feed der Stadt ist nicht erreichbar.",
       "no_garages": "Der Parkleitsystem-Feed der Stadt lieferte keine Parkhäuser.",
       "unknown": "Unerwarteter Fehler, siehe Protokoll."
@@ -27,6 +54,9 @@
   "device": {
     "city": {
       "name": "Parkhäuser {city}"
+    },
+    "prail": {
+      "name": "SBB P+Rail"
     }
   },
   "entity": {
@@ -38,6 +68,19 @@
             "state": {
               "open": "Offen",
               "closed": "Geschlossen",
+              "unknown": "Unbekannt"
+            }
+          }
+        }
+      },
+      "estimated_occupancy": {
+        "state_attributes": {
+          "level": {
+            "name": "Geschätzte Auslastung",
+            "state": {
+              "low": "Tief",
+              "medium": "Mittel",
+              "high": "Hoch",
               "unknown": "Unbekannt"
             }
           }

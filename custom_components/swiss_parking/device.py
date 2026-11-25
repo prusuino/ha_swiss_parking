@@ -5,7 +5,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 
-from .const import CITIES, CONF_CITY, DOMAIN, VERSION
+from .const import CITIES, CITY_PRAIL, CONF_CITY, DOMAIN, VERSION
 
 
 def device_info(hass: HomeAssistant, entry: ConfigEntry) -> DeviceInfo:
@@ -16,7 +16,7 @@ def device_info(hass: HomeAssistant, entry: ConfigEntry) -> DeviceInfo:
     return DeviceInfo(
         identifiers={(DOMAIN, entry.entry_id)},
         sw_version=VERSION,
-        translation_key="city",
+        translation_key="prail" if city == CITY_PRAIL else "city",
         translation_placeholders={"city": CITIES[city]["name"]},
         manufacturer="Swiss Parking",
         model=CITIES[city]["name"],

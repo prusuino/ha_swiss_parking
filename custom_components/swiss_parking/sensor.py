@@ -1,4 +1,5 @@
-"""Sensors: one free-spaces sensor per garage of the configured city.
+"""Sensors: one free-spaces sensor per garage of the configured city, or one
+estimated-occupancy sensor per chosen P+Rail station.
 
 Garages can appear/disappear in the source feeds, so the entity list is
 diffed on every coordinator update (same pattern as the connector sensors
@@ -11,6 +12,7 @@ import logging
 
 from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import PERCENTAGE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -29,6 +31,7 @@ async def async_setup_entry(
 ) -> None:
     coordinator: SwissParkingCoordinator = entry.runtime_data
     known: dict[str, GarageFreeSpacesSensor] = {}
+    sensor_class = PrailOccupancySensor if coordinator.is_prail else GarageFreeSpacesSensor
     city_slug = slugify(CITIES[coordinator.city]["name"])
 
     @callback
@@ -38,7 +41,7 @@ async def async_setup_entry(
         new_entities = []
         for garage_id, garage in garages.items():
             if garage_id not in known:
-                known[garage_id] = GarageFreeSpacesSensor(hass, coordinator, entry, garage_id, city_slug)
+                known[garage_id] = sensor_class(hass, coordinator, entry, garage_id, city_slug)
                 new_entities.append(known[garage_id])
         if new_entities:
             async_add_entities(new_entities)
@@ -109,6 +112,38 @@ class GarageFreeSpacesSensor(CoordinatorEntity[SwissParkingCoordinator], SensorE
             "status": garage.get("status") or STATUS_UNKNOWN,
             "total": total,
             "occupancy_percent": occupancy,
+            "address": garage.get("address"),
+            "link": garage.get("link"),
+            "latitude": garage.get("latitude"),
+            "longitude": garage.get("longitude"),
+            "last_update": garage.get("last_update"),
+        }
+
+
+class PrailOccupancySensor(GarageFreeSpacesSensor):
+    """Estimated occupancy of one P+Rail car park in percent. The SBB counts
+    nothing there, so this is no number of free spaces."""
+
+    _attr_translation_key = "estimated_occupancy"
+    _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_suggested_display_precision = 0
+    _unrecorded_attributes = frozenset({"forecast"})
+
+    @property
+    def native_value(self):
+        return self._garage().get("occupancy")
+
+    @property
+    def icon(self):
+        return "mdi:parking"
+
+    @property
+    def extra_state_attributes(self):
+        garage = self._garage()
+        return {
+            "level": garage.get("level") or STATUS_UNKNOWN,
+            "total": garage.get("total"),
+            "forecast": garage.get("forecast") or [],
             "address": garage.get("address"),
             "link": garage.get("link"),
             "latitude": garage.get("latitude"),

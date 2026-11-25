@@ -3,16 +3,43 @@
     "step": {
       "user": {
         "title": "Swiss Parking",
-        "description": "Places de parking libres en temps réel depuis le système de guidage au stationnement d'une ville suisse. Une entrée par ville — ajoutez à nouveau l'intégration pour une autre ville. Actuellement pris en charge : Zurich, Bâle, Winterthour, Berne, Frauenfeld, Saint-Gall.",
+        "description": "Places de parking libres en temps réel depuis le système de guidage au stationnement d'une ville suisse. Une entrée par ville — ajoutez à nouveau l'intégration pour une autre ville. Actuellement pris en charge : Zurich, Bâle, Winterthour, Berne, Frauenfeld, Saint-Gall. Les parkings des gares sont proposés sous SBB P+Rail (occupation estimée).",
         "data": {
           "city": "Ville"
+        }
+      },
+      "stations": {
+        "title": "SBB P+Rail : gares",
+        "description": "Choisis les gares. L'occupation est une estimation des CFF, actualisée toutes les demi-heures ; les places libres ne sont pas comptées. Seules les gares avec une estimation figurent dans la liste.",
+        "data": {
+          "stations": "Gares"
         }
       }
     },
     "abort": {
-      "already_configured": "Cette ville est déjà configurée."
+      "already_configured": "Cette ville ou P+Rail est déjà configurée."
     },
     "error": {
+      "cannot_connect": "Le flux de la ville est injoignable.",
+      "no_garages": "Le flux de la ville n'a renvoyé aucun parking.",
+      "unknown": "Erreur inattendue, voir le journal.",
+      "no_stations": "Choisis au moins une gare."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SBB P+Rail : gares",
+        "description": "Choisis les gares. L'occupation est une estimation des CFF, actualisée toutes les demi-heures ; les places libres ne sont pas comptées. Seules les gares avec une estimation figurent dans la liste.",
+        "data": {
+          "stations": "Gares"
+        }
+      }
+    },
+    "error": {
+      "no_stations": "Choisis au moins une gare."
+    },
+    "abort": {
       "cannot_connect": "Le flux de la ville est injoignable.",
       "no_garages": "Le flux de la ville n'a renvoyé aucun parking.",
       "unknown": "Erreur inattendue, voir le journal."
@@ -27,6 +54,9 @@
   "device": {
     "city": {
       "name": "Parkings {city}"
+    },
+    "prail": {
+      "name": "SBB P+Rail"
     }
   },
   "entity": {
@@ -39,6 +69,19 @@
               "open": "Ouvert",
               "closed": "Fermé",
               "unknown": "Inconnu"
+            }
+          }
+        }
+      },
+      "estimated_occupancy": {
+        "state_attributes": {
+          "level": {
+            "name": "Occupation estimée",
+            "state": {
+              "low": "Faible",
+              "medium": "Moyenne",
+              "high": "Élevée",
+              "unknown": "Inconnue"
             }
           }
         }

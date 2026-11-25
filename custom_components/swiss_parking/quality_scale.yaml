@@ -84,7 +84,7 @@ rules:
   icon-translations: todo
   reconfiguration-flow:
     status: exempt
-    comment: An entry is one city with no further settings.
+    comment: A city entry has no settings; the P+Rail stations are changed in the options.
   repair-issues: done
   stale-devices: done
 

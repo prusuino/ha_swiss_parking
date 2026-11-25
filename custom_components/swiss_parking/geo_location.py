@@ -158,6 +158,8 @@ class GarageEvent(GeolocationEvent):
         garage = self._garage
         if garage.get("status") == STATUS_CLOSED:
             return t("map_label_closed", self._hass_ref)
+        if garage.get("occupancy") is not None:
+            return f"≈ {garage['occupancy']} %"  # P+Rail: estimated, nothing is counted
         free = garage.get("free")
         if free is None:
             return "?"

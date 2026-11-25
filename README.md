@@ -18,6 +18,7 @@ A Home Assistant custom integration that shows the live number of free parking s
 
 - **Free spaces, live**: one sensor per car park with status, capacity and occupancy, refreshed every 2 minutes from the city's official parking-guidance system.
 - **Six cities so far**: Zürich, Basel, Winterthur, Bern, Frauenfeld and St. Gallen — one entry per city.
+- **SBB P+Rail**: the estimated occupancy of the car parks at more than 400 railway stations all over Switzerland, with the typical next 24 hours; you pick the stations.
 - **On the map**: a marker per car park, labelled with the number of free spaces, with a fixed entity id that is the same in every language.
 - **Follows the city**: car parks that appear in or disappear from a feed are picked up automatically.
 - **Honest about age**: a record older than 24 hours is not shown as live, and every city reports its last update in the same ISO 8601 form.
@@ -55,6 +56,7 @@ More Home Assistant integrations from the same author:
 | Bern | ~12 | Berner Parkhäuser (XML) |
 | Frauenfeld | 7 | Stadt Frauenfeld / Kanton Thurgau open data portal (JSON) |
 | St. Gallen | 14 | City of St. Gallen open data portal (JSON, CC BY-NC 4.0) |
+| SBB P+Rail | 430+ stations | opentransportdata.swiss (JSON), **estimated** occupancy |
 
 There is no national aggregator for parking data in Switzerland — each city publishes its own feed in its own format, so each city has its own small adapter. Other cities either publish no machine-readable real-time feed at all, or their feed requires an access token (Geneva). New adapters are welcome — open an issue if your city publishes a feed.
 
@@ -69,7 +71,18 @@ One config entry per city (add the integration again for another city):
 | `sensor.parking_<city>_<garage>` | Sensor | State = currently free spaces of one car park. Attributes: status (`open` / `closed` / `unknown`, shown translated in the UI), capacity, occupancy %, address, link, coordinates, last update (ISO 8601). |
 | `geo_location.parking_<city>_<garage>` (markers created before 1.3.0 keep their localized id — see [Addressing the map markers](#addressing-the-map-markers)) | Geo-location | One map marker per car park with known coordinates, labeled with the live number of free spaces ("158 free") or "Closed", refreshed in place on every update; the marker goes unavailable while the city's feed is unreachable. State = distance from your Home Assistant home zone (km). Attributes: status label, free, total, address, link, last update (ISO 8601). Zürich's feed contains no coordinates, so Zürich creates sensors only. Frauenfeld reports open surface lots (no open/closed state). |
 
-Data refreshes every 2 minutes. Garages appearing in or disappearing from a feed are picked up automatically.
+Data refreshes every 2 minutes (P+Rail: every 30 minutes). Garages appearing in or disappearing from a feed are picked up automatically.
+
+### SBB P+Rail
+
+Choose **SBB P+Rail** in the list of cities, then the stations you want. Each station gets
+
+| Entity | Description |
+|---|---|
+| `sensor.parking_sbb_p_rail_<station>` | Estimated occupancy in percent. Attributes: `level` (`low` / `medium` / `high` / `unknown`), capacity (`total`), `forecast` (the typical occupancy of the next 24 hours: a list of `time` and `occupancy_percent`), address, coordinates, link, last update. The forecast is not stored in the history. |
+| `geo_location.parking_sbb_p_rail_<station>` | Map marker, labelled with the estimate ("≈ 62 %"). |
+
+The SBB does not count cars at these car parks: the value is **an estimate**, so there is no number of free spaces. The source file is rebuilt every half hour and holds all stations (under 1 MB per download); the integration picks yours locally. Only stations with an estimate or a forecast are offered. Other stations can be chosen later under **Configure**. An estimate from a file older than three hours is not shown.
 
 ### Addressing the map markers
 
@@ -134,7 +147,7 @@ The integration is listed in the Marketplace default catalog (formerly the HACS 
 
 1. Go to **Settings → Devices & Services → Add Integration**.
 2. Search for **"Swiss Parking"**.
-3. Pick a city — the feed is probed live before the entry is created. Add the integration again for another city.
+3. Pick a city (or SBB P+Rail and then the stations) — the feed is probed live before the entry is created. Add the integration again for another city.
 
 ## Removal
 
